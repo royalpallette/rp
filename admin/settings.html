@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Settings | Royal Pallette Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { brand: { DEFAULT: '#fb7185', dark: '#be123c' }, dark: '#171717' } }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; } </style>
+    <script src="../js/admin_auth.js"></script>
+    <script> checkAdminAuth(); </script>
+<script type="module" src="../js/favicon.js"></script>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 bg-dark text-white flex flex-col">
+        <div class="h-20 flex items-center px-6 border-b border-gray-700">
+            <span class="text-2xl font-bold tracking-tight text-brand">Admin Panel</span>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="pos.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">POS Terminal</a>
+            <a href="items.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Manage Items</a>
+            <a href="images.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Product Images</a>
+            <a href="orders.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Orders</a>
+            <a href="settings.html" class="flex items-center px-4 py-3 bg-brand text-white rounded-lg shadow-md transition">Site Settings</a>
+        </nav>
+        <div class="p-4 border-t border-gray-800">
+            <button onclick="adminLogout()" class="block w-full text-left py-2 px-4 text-red-400 hover:text-red-300 hover:bg-gray-800 rounded transition">Logout</button>
+        </div>
+        <div class="p-4 border-t border-gray-700">
+            <a href="../index.html" class="text-sm text-gray-400 hover:text-white flex items-center gap-2">
+                &larr; Back to Shop
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden">
+        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm">
+            <h1 class="text-2xl font-semibold text-gray-800">Site Settings</h1>
+        </header>
+
+        <div class="flex-1 overflow-auto p-8">
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                
+                <h2 class="text-lg font-semibold mb-2">Update Website Logo / Favicon</h2>
+                <p class="text-sm text-gray-500 mb-6">This logo appears in the browser tab next to the page title.</p>
+
+                <form id="favicon-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Favicon (PNG/ICO/JPG)</label>
+                        <input type="file" id="favicon-file" required accept=".png, .ico, .jpg, .jpeg" class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border border-gray-300 rounded-md">
+                    </div>
+                    <button type="submit" id="save-btn" class="w-full bg-brand text-white py-2 rounded-md hover:bg-brand-dark transition font-medium">Upload & Save Favicon</button>
+                    <div id="status-msg" class="text-sm hidden mt-2"></div>
+                </form>
+
+                <div class="mt-8 border-t pt-6">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Current Favicon:</h3>
+                    <div id="current-favicon" class="flex items-center gap-3 text-sm text-gray-500">
+                        <img id="favicon-preview" src="https://via.placeholder.com/32" class="w-8 h-8 rounded border object-cover">
+                        <span id="favicon-url-text">Loading...</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { storage, db } from '../js/firebase-config.js';
+        import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { ref as dbRef, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const form = document.getElementById('favicon-form');
+        const saveBtn = document.getElementById('save-btn');
+        const statusMsg = document.getElementById('status-msg');
+
+        // Load current favicon
+        onValue(dbRef(db, 'settings/favicon'), (snapshot) => {
+            if (snapshot.exists()) {
+                const url = snapshot.val();
+                document.getElementById('favicon-preview').src = url;
+                document.getElementById('favicon-url-text').textContent = "Active";
+            } else {
+                document.getElementById('favicon-url-text').textContent = "No custom favicon set.";
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = document.getElementById('favicon-file').files[0];
+            if (!file) return;
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Uploading...';
+            statusMsg.classList.add('hidden');
+
+            try {
+                // Upload to Storage
+                const ext = file.name.split('.').pop();
+                const sRef = storageRef(storage, `site_settings/favicon_${Date.now()}.${ext}`);
+                await uploadBytes(sRef, file);
+                
+                // Get URL
+                const url = await getDownloadURL(sRef);
+
+                // Save to RTDB
+                await set(dbRef(db, 'settings/favicon'), url);
+
+                statusMsg.textContent = "✅ Favicon updated successfully! Refresh your website to see the change.";
+                statusMsg.className = "text-sm text-green-600 block mt-2";
+                form.reset();
+
+            } catch (error) {
+                console.error("Upload error", error);
+                statusMsg.textContent = "❌ Error uploading: " + error.message;
+                statusMsg.className = "text-sm text-red-600 block mt-2";
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Upload & Save Favicon';
+            }
+        });
+    </script>
+</body>
+</html>
