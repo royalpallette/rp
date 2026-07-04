@@ -13,7 +13,12 @@
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; } </style>
+    <style> 
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .tab-btn.active { background-color: #171717; color: white; }
+        #img-preview { display: none; }
+        #img-preview.show { display: block; }
+    </style>
     <script src="../js/admin_auth.js"></script>
     <script> checkAdminAuth(); </script>
 </head>
@@ -60,15 +65,77 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
                             <textarea id="item-desc" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand"></textarea>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Price (Rs.)</label>
-                            <input type="number" id="item-price" required min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand">
+
+                        <!-- Price Fields -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Price (Rs.)</label>
+                                <input type="number" id="item-price" required min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Sale Price <span class="text-gray-400 text-xs">(Optional)</span>
+                                </label>
+                                <input type="number" id="item-sale-price" min="0" step="0.01" placeholder="Kapana rate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand">
+                            </div>
                         </div>
+
+                        <!-- Image Section -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                            <input type="url" id="item-image" placeholder="https://..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                            
+                            <!-- Image Tabs -->
+                            <div class="flex rounded-md overflow-hidden border border-gray-300 mb-3">
+                                <button type="button" id="tab-browse" class="tab-btn active flex-1 py-1.5 text-xs font-medium transition" onclick="switchTab('browse')">
+                                    📁 Upload New
+                                </button>
+                                <button type="button" id="tab-cloud" class="tab-btn flex-1 py-1.5 text-xs font-medium bg-gray-100 transition" onclick="switchTab('cloud')">
+                                    ☁️ Get From Our Web
+                                </button>
+                                <button type="button" id="tab-search" class="tab-btn flex-1 py-1.5 text-xs font-medium bg-gray-100 transition" onclick="switchTab('search')">
+                                    🔍 Online Search
+                                </button>
+                                <button type="button" id="tab-url" class="tab-btn flex-1 py-1.5 text-xs font-medium bg-gray-100 transition" onclick="switchTab('url')">
+                                    🔗 URL
+                                </button>
+                            </div>
+
+                            <!-- Tab: Browse File -->
+                            <div id="panel-browse">
+                                <input type="file" id="item-file" accept="image/*" class="w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-brand file:text-white hover:file:bg-brand-dark cursor-pointer">
+                                <p class="text-xs text-gray-400 mt-1">Saves as local base64. For better performance, use 'Product Images' page to upload to Cloud, then use 'Get From Our Web'.</p>
+                            </div>
+
+                            <!-- Tab: Get From Our Web -->
+                            <div id="panel-cloud" class="hidden">
+                                <div class="flex gap-2">
+                                    <input type="text" id="cloud-code" placeholder="Enter Item Code (e.g. 1001)" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand">
+                                    <button type="button" id="cloud-btn" class="px-3 py-2 bg-dark text-white rounded-md text-sm hover:bg-black transition whitespace-nowrap">Fetch</button>
+                                </div>
+                                <p id="cloud-result" class="text-xs mt-1 text-gray-500">Retrieves from Firebase Cloud Storage.</p>
+                            </div>
+
+                            <!-- Tab: Search by Code -->
+                            <div id="panel-search" class="hidden">
+                                <div class="flex gap-2">
+                                    <input type="text" id="item-barcode" placeholder="Enter barcode / product code" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand">
+                                    <button type="button" id="search-btn" onclick="searchProduct()" class="px-3 py-2 bg-dark text-white rounded-md text-sm hover:bg-black transition whitespace-nowrap">Search</button>
+                                </div>
+                                <div id="search-result" class="mt-2 text-xs text-gray-500 hidden"></div>
+                            </div>
+
+                            <!-- Tab: URL -->
+                            <div id="panel-url" class="hidden">
+                                <input type="url" id="item-image-url" placeholder="https://example.com/image.jpg" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand">
+                            </div>
+
+                            <!-- Image Preview -->
+                            <div id="img-preview" class="mt-3 rounded-lg overflow-hidden border border-gray-200">
+                                <img id="preview-img" src="" alt="Preview" class="w-full h-36 object-cover">
+                            </div>
                         </div>
                         
+                        <!-- Categorization -->
                         <div class="pt-2">
                             <h3 class="text-sm font-semibold text-gray-800 mb-2">Categorization</h3>
                             <div class="space-y-3">
@@ -102,11 +169,12 @@
                                     <th class="p-3 font-medium">Name</th>
                                     <th class="p-3 font-medium">Category</th>
                                     <th class="p-3 font-medium">Price</th>
+                                    <th class="p-3 font-medium">Sale</th>
                                     <th class="p-3 font-medium text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="inventory-list" class="divide-y divide-gray-100">
-                                <tr><td colspan="4" class="p-4 text-center text-gray-500 text-sm">Loading items...</td></tr>
+                                <tr><td colspan="5" class="p-4 text-center text-gray-500 text-sm">Loading items...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -115,6 +183,143 @@
             </div>
         </div>
     </main>
+
+    <script type="module">
+        import { storage } from '../js/firebase-config.js';
+        import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        // Expose to window for inline scripts
+        window.activeTab = 'browse';
+        window.resolvedImageUrl = '';
+
+        window.switchTab = function(tab) {
+            window.activeTab = tab;
+            ['browse', 'cloud', 'search', 'url'].forEach(t => {
+                document.getElementById('panel-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).classList.remove('active');
+                document.getElementById('tab-' + t).classList.add('bg-gray-100');
+            });
+            document.getElementById('panel-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('tab-' + tab).classList.remove('bg-gray-100');
+        }
+
+        // Browse file preview
+        document.getElementById('item-file').addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                window.resolvedImageUrl = e.target.result; // base64
+                window.showPreview(window.resolvedImageUrl);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('item-image-url').addEventListener('input', function() {
+            window.resolvedImageUrl = this.value;
+            if (window.resolvedImageUrl) window.showPreview(window.resolvedImageUrl);
+        });
+
+        // Fetch from Cloud
+        document.getElementById('cloud-btn').addEventListener('click', async () => {
+            const code = document.getElementById('cloud-code').value.trim();
+            const res = document.getElementById('cloud-result');
+            if(!code) { res.textContent = "Please enter a code!"; res.className = "text-xs mt-1 text-red-500"; return; }
+            
+            res.textContent = "Fetching...";
+            res.className = "text-xs mt-1 text-gray-500";
+            
+            try {
+                // Try .jpg first, then .png
+                let url;
+                try {
+                    url = await getDownloadURL(ref(storage, `product_images/${code}.jpg`));
+                } catch(e) {
+                    url = await getDownloadURL(ref(storage, `product_images/${code}.png`));
+                }
+                
+                window.resolvedImageUrl = url;
+                window.showPreview(url);
+                res.textContent = "✅ Image loaded from Cloud!";
+                res.className = "text-xs mt-1 text-green-600";
+            } catch (err) {
+                res.textContent = "❌ Image not found in Cloud Storage.";
+                res.className = "text-xs mt-1 text-red-500";
+            }
+        });
+
+        window.showPreview = function(url) {
+            const preview = document.getElementById('img-preview');
+            const img = document.getElementById('preview-img');
+            img.src = url;
+            preview.classList.add('show');
+        }
+
+        window.searchProduct = async function() {
+            const code = document.getElementById('item-barcode').value.trim();
+            const resultEl = document.getElementById('search-result');
+            const btn = document.getElementById('search-btn');
+            
+            if (!code) { alert('Please enter a barcode or product code.'); return; }
+            
+            btn.textContent = 'Searching...';
+            btn.disabled = true;
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = 'Searching product database...';
+            resultEl.className = 'mt-2 text-xs text-gray-500';
+
+            try {
+                // Try Open Beauty Facts first (cosmetics)
+                const res = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`);
+                const data = await res.json();
+                
+                if (data.status === 1 && data.product) {
+                    const product = data.product;
+                    const imgUrl = product.image_url || product.image_front_url || '';
+                    
+                    if (imgUrl) {
+                        window.resolvedImageUrl = imgUrl;
+                        showPreview(imgUrl);
+
+                        // Auto-fill name if empty
+                        if (!document.getElementById('item-name').value && product.product_name) {
+                            document.getElementById('item-name').value = product.product_name;
+                        }
+                        
+                        resultEl.textContent = `✅ Found: ${product.product_name || 'Unknown product'}`;
+                        resultEl.className = 'mt-2 text-xs text-green-600';
+                    } else {
+                        resultEl.textContent = '⚠️ Product found but no image available.';
+                        resultEl.className = 'mt-2 text-xs text-yellow-600';
+                    }
+                } else {
+                    // Fallback: Open Food Facts
+                    const res2 = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+                    const data2 = await res2.json();
+                    
+                    if (data2.status === 1 && data2.product && data2.product.image_url) {
+                        window.resolvedImageUrl = data2.product.image_url;
+                        showPreview(window.resolvedImageUrl);
+                        if (!document.getElementById('item-name').value && data2.product.product_name) {
+                            document.getElementById('item-name').value = data2.product.product_name;
+                        }
+                        resultEl.textContent = `✅ Found: ${data2.product.product_name || 'Product'}`;
+                        resultEl.className = 'mt-2 text-xs text-green-600';
+                    } else {
+                        resultEl.textContent = '❌ Product not found. Try URL tab to paste image link manually.';
+                        resultEl.className = 'mt-2 text-xs text-red-500';
+                    }
+                }
+            } catch (err) {
+                resultEl.textContent = '❌ Search failed. Check your internet connection.';
+                resultEl.className = 'mt-2 text-xs text-red-500';
+            } finally {
+                btn.textContent = 'Search';
+                btn.disabled = false;
+            }
+        }
+    </script>
 
     <script type="module" src="../js/admin_items.js"></script>
 </body>

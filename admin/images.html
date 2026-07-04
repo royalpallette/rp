@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Images | Royal Pallette Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { brand: { DEFAULT: '#fb7185', dark: '#be123c' }, dark: '#171717' } }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; } </style>
+    <script src="../js/admin_auth.js"></script>
+    <script> checkAdminAuth(); </script>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 bg-dark text-white flex flex-col">
+        <div class="h-20 flex items-center px-6 border-b border-gray-700">
+            <span class="text-2xl font-bold tracking-tight text-brand">Admin Panel</span>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="pos.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">POS Terminal</a>
+            <a href="items.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Manage Items</a>
+            <a href="images.html" class="flex items-center px-4 py-3 bg-brand text-white rounded-lg shadow-md transition">Product Images</a>
+            <a href="orders.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Orders</a>
+        </nav>
+        <div class="p-4 border-t border-gray-800">
+            <button onclick="adminLogout()" class="block w-full text-left py-2 px-4 text-red-400 hover:text-red-300 hover:bg-gray-800 rounded transition">Logout</button>
+        </div>
+        <div class="p-4 border-t border-gray-700">
+            <a href="../index.html" class="text-sm text-gray-400 hover:text-white flex items-center gap-2">
+                &larr; Back to Shop
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden">
+        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm">
+            <h1 class="text-2xl font-semibold text-gray-800">Product Images Cloud</h1>
+        </header>
+
+        <div class="flex-1 overflow-auto p-8">
+            <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                
+                <h2 class="text-lg font-semibold mb-2">Upload a Product Image</h2>
+                <p class="text-sm text-gray-500 mb-6">Upload images directly to Firebase Cloud Storage. Enter the Item Number (e.g., 1001) as the code.</p>
+
+                <form id="upload-form" class="space-y-4 max-w-md">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Item Code / Number</label>
+                        <input type="text" id="img-code" required placeholder="e.g. 1001" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Image</label>
+                        <input type="file" id="img-file" required accept="image/*" class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border border-gray-300 rounded-md">
+                    </div>
+                    <button type="submit" id="upload-btn" class="w-full bg-brand text-white py-2 rounded-md hover:bg-brand-dark transition font-medium">Upload to Cloud</button>
+                    <div id="status-msg" class="text-sm hidden mt-2"></div>
+                </form>
+
+                <div class="mt-12">
+                    <h3 class="text-lg font-semibold mb-4 border-b pb-2">Recently Uploaded Preview</h3>
+                    <div id="gallery" class="grid grid-cols-4 gap-4">
+                        <p class="text-sm text-gray-500 col-span-4">Upload an image to see it here.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { storage } from '../js/firebase-config.js';
+        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        const form = document.getElementById('upload-form');
+        const uploadBtn = document.getElementById('upload-btn');
+        const statusMsg = document.getElementById('status-msg');
+        const gallery = document.getElementById('gallery');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const file = document.getElementById('img-file').files[0];
+            const code = document.getElementById('img-code').value.trim();
+
+            if (!file || !code) return;
+
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            statusMsg.classList.add('hidden');
+
+            try {
+                // Get extension
+                const ext = file.name.split('.').pop();
+                const fileName = `${code}.${ext}`;
+                const storageRef = ref(storage, `product_images/${fileName}`);
+
+                // Upload
+                await uploadBytes(storageRef, file);
+                
+                // Get URL
+                const url = await getDownloadURL(storageRef);
+
+                statusMsg.textContent = "✅ Uploaded successfully!";
+                statusMsg.className = "text-sm text-green-600 block mt-2";
+                
+                // Show in gallery
+                if(gallery.innerHTML.includes('Upload an image')) gallery.innerHTML = '';
+                gallery.innerHTML += `
+                    <div class="border border-gray-200 rounded-lg p-2 text-center">
+                        <img src="${url}" class="w-full h-32 object-cover rounded mb-2">
+                        <span class="text-xs font-medium text-gray-600">Code: ${code}</span>
+                    </div>
+                `;
+
+                form.reset();
+
+            } catch (error) {
+                console.error("Upload error", error);
+                statusMsg.textContent = "❌ Error uploading: " + error.message;
+                statusMsg.className = "text-sm text-red-600 block mt-2";
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload to Cloud';
+            }
+        });
+    </script>
+</body>
+</html>

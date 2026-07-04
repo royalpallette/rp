@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isSignup = false;
     let pendingSignupData = null;
     let generatedOTP = "";
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwYUjXNkd9evUAUUvPwmH4n4mOcwG_GUhV-eWelLvlq8G1-ErhIe3FuLo7J5SzYJPTf4Q/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypFPSA-hyV0Te9-_Fx1A0KTKCzY3Lt9yLSw52ODC-G2CghH3AlVP2x4dqnBhmNbZOlxw/exec";
 
     if (!toggleBtn) return; // Guard clause
 
@@ -66,19 +66,15 @@ toggleBtn.addEventListener('click', (e) => {
                 // Generate a real 6-digit OTP
                 generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
                 
-                // Send OTP via Google Apps Script
+                // Send OTP via Google Apps Script (GET request - bypasses CORS issues)
                 try {
-                    fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors', 
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: email, otp: generatedOTP })
-                    });
-                    console.log(`[Google Script] OTP request sent for ${email}`);
-                    alert(`An OTP has been sent to your email (${email}).`);
+                    const scriptUrl = `${GOOGLE_SCRIPT_URL}?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(generatedOTP)}`;
+                    fetch(scriptUrl, { mode: 'no-cors' });
+                    console.log(`[Google Script] OTP GET request sent for ${email}`);
+                    alert(`An OTP has been sent to your email (${email}). Please check your inbox.`);
                 } catch (err) {
                     console.error("Error sending OTP:", err);
-                    alert("Failed to trigger email script.");
+                    alert("Failed to send OTP email. Please try again.");
                 }
                 
                 // Show OTP Modal
