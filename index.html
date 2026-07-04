@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Pallette | Premium Beauty & Cosmetics</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#ffe4e6',
+                            DEFAULT: '#fb7185',
+                            dark: '#be123c',
+                        },
+                        dark: '#171717'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #fafafa; }
+        h1, h2, h3, .font-serif { font-family: 'Playfair Display', serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <span class="text-3xl font-serif font-bold text-brand-dark tracking-tighter">Royal Pallette</span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="index.html" class="text-gray-900 hover:text-brand transition font-medium">Shop</a>
+                    <a href="categories.html" class="text-gray-600 hover:text-brand transition font-medium">Categories</a>
+                    <a href="customer/auth.html" id="nav-login" class="text-gray-600 hover:text-brand transition font-medium">Login</a>
+                    <a href="customer/profile.html" id="nav-profile" class="hidden text-gray-600 hover:text-brand transition font-medium">Profile</a>
+                    <a href="customer/cart.html" class="relative text-gray-600 hover:text-brand transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-brand-dark text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="pt-20">
+        <div class="relative bg-dark text-white overflow-hidden">
+            <div class="absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=2000&auto=format&fit=crop" alt="Cosmetics" class="w-full h-full object-cover opacity-40">
+            </div>
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 flex flex-col items-center text-center">
+                <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight">Discover Your <span class="text-brand-light italic">Radiance</span></h1>
+                <p class="text-xl md:text-2xl mb-10 max-w-2xl text-gray-200 font-light">Premium cosmetics and beauty essentials curated for your unique style.</p>
+                <a href="#products" class="bg-brand text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-brand-dark transition transform hover:scale-105 shadow-lg">Shop the Collection</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Section -->
+    <main id="products" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-grow">
+        <div class="flex justify-between items-end mb-10">
+            <div>
+                <h2 class="text-3xl font-bold font-serif text-gray-900">Featured Products</h2>
+                <p class="text-gray-500 mt-2">Latest additions from our shop</p>
+            </div>
+            <div class="flex gap-2">
+                <button class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition">Filter</button>
+            </div>
+        </div>
+
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Products will be injected here via JS -->
+            <div class="col-span-full text-center py-20 text-gray-500">
+                <div class="animate-pulse flex flex-col items-center">
+                    <div class="h-8 w-8 border-4 border-brand border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p>Loading premium products...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-gray-300 py-12 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-2xl font-serif text-white mb-4">Royal Pallette</h3>
+                <p class="text-sm text-gray-400">Elevating beauty through premium curated collections.</p>
+            </div>
+            <div>
+                <h4 class="text-lg text-white mb-4">Quick Links</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="hover:text-brand">About Us</a></li>
+                    <li><a href="#" class="hover:text-brand">Contact</a></li>
+                    <li><a href="admin/pos.html" class="hover:text-brand text-gray-500">Admin Login</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg text-white mb-4">Newsletter</h4>
+                <div class="flex">
+                    <input type="email" placeholder="Enter your email" class="px-4 py-2 rounded-l-md w-full bg-gray-800 border-none text-white focus:ring-1 focus:ring-brand outline-none">
+                    <button class="bg-brand px-4 py-2 rounded-r-md hover:bg-brand-dark transition text-white">Subscribe</button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
