@@ -252,21 +252,80 @@ document.getElementById('save-cust-btn').addEventListener('click', async () => {
     }
 });
 
-// Checkout and Print
-document.getElementById('checkout-btn').addEventListener('click', async () => {
+// Checkout Process
+document.getElementById('checkout-btn').addEventListener('click', () => {
     if (cart.length === 0) return alert('Cart is empty!');
     const customer = posCustomer.value;
     if (!customer) return alert('Please select a customer!');
     
-    const btn = document.getElementById('checkout-btn');
-    btn.disabled = true;
-    btn.innerHTML = 'Processing...';
+    // Open Payment Modal
+    const totalStr = posTotal.textContent.replace('Rs. ', '');
+    document.getElementById('payment-modal-total').textContent = posTotal.textContent;
+    document.getElementById('pay-amount-given').value = '';
+    document.getElementById('pay-change-due').textContent = 'Rs. 0.00';
+    
+    document.querySelector('input[name="pay-method"][value="Cash"]').checked = true;
+    window.toggleCashFields();
 
+    const modal = document.getElementById('payment-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+});
+
+window.closePaymentModal = function() {
+    const modal = document.getElementById('payment-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
+
+window.toggleCashFields = function() {
+    const method = document.querySelector('input[name="pay-method"]:checked').value;
+    const cashFields = document.getElementById('cash-payment-fields');
+    if (method === 'Cash') {
+        cashFields.style.display = 'block';
+    } else {
+        cashFields.style.display = 'none';
+    }
+};
+
+window.calculateChange = function() {
+    const total = parseFloat(posTotal.textContent.replace('Rs. ', '')) || 0;
+    const given = parseFloat(document.getElementById('pay-amount-given').value) || 0;
+    const change = given - total;
+    const changeEl = document.getElementById('pay-change-due');
+    if (change >= 0) {
+        changeEl.textContent = `Rs. ${change.toFixed(2)}`;
+        changeEl.className = "text-xl font-bold text-green-600";
+    } else {
+        changeEl.textContent = `Need Rs. ${Math.abs(change).toFixed(2)} more`;
+        changeEl.className = "text-xl font-bold text-red-600";
+    }
+};
+
+document.getElementById('confirm-payment-btn').addEventListener('click', async () => {
+    const customer = posCustomer.value;
+    const method = document.querySelector('input[name="pay-method"]:checked').value;
+    
     const subtotalStr = posSubtotal.textContent.replace('Rs. ', '');
     const totalStr = posTotal.textContent.replace('Rs. ', '');
     const discountAmount = parseFloat(posDiscount.value) || 0;
     const deliveryAmount = parseFloat(posDelivery.value) || 0;
     const totalAmount = parseFloat(totalStr);
+
+    let amountGiven = totalAmount;
+    let changeDue = 0;
+
+    if (method === 'Cash') {
+        amountGiven = parseFloat(document.getElementById('pay-amount-given').value) || 0;
+        if (amountGiven < totalAmount) {
+            return alert('Insufficient cash provided!');
+        }
+        changeDue = amountGiven - totalAmount;
+    }
+
+    const btn = document.getElementById('confirm-payment-btn');
+    btn.disabled = true;
+    btn.innerHTML = 'Processing...';
 
     try {
         // 1. Generate Incremental Order ID
@@ -289,6 +348,9 @@ document.getElementById('checkout-btn').addEventListener('click', async () => {
             orderNo: newOrderNo,
             customer: customer,
             source: 'POS',
+            paymentMethod: method,
+            amountGiven: amountGiven,
+            changeDue: changeDue,
             items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
             subtotal: parseFloat(subtotalStr),
             discount: discountAmount,
@@ -305,6 +367,7 @@ document.getElementById('checkout-btn').addEventListener('click', async () => {
         
         // 4. Reset POS
         alert('Payment successful & Order saved!');
+        closePaymentModal();
         cart = [];
         posDiscount.value = "0";
         posDelivery.value = "0";
@@ -315,7 +378,7 @@ document.getElementById('checkout-btn').addEventListener('click', async () => {
         alert('Error processing order.');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg> Pay & Checkout`;
+        btn.innerHTML = 'Complete & Print';
     }
 });
 
@@ -350,9 +413,19 @@ function printReceipt(orderData) {
     } else {
         document.getElementById('receipt-delivery-row').style.display = 'none';
     }
-
-    document.getElementById('receipt-total').textContent = "Rs. " + orderData.total.toFixed(2);
     
+    document.getElementById('receipt-total').textContent = "Rs. " + orderData.total.toFixed(2);
+
+    document.getElementById('receipt-method').textContent = orderData.paymentMethod || 'Cash';
+    document.getElementById('receipt-paid').textContent = "Rs. " + (orderData.amountGiven || orderData.total).toFixed(2);
+    
+    if (orderData.changeDue > 0) {
+        document.getElementById('receipt-change-row').style.display = 'block';
+        document.getElementById('receipt-change').textContent = "Rs. " + orderData.changeDue.toFixed(2);
+    } else {
+        document.getElementById('receipt-change-row').style.display = 'none';
+    }
+
     const printContent = document.getElementById('print-receipt').innerHTML;
     const printWindow = window.open('', '', 'width=400,height=600');
     printWindow.document.write('<html><head><title>Receipt</title></head><body>');

@@ -182,6 +182,58 @@
         </div>
     </div>
 
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Complete Payment</h3>
+            
+            <div class="mb-4">
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <span class="text-sm text-gray-600 font-medium">Total Amount To Pay</span>
+                    <span id="payment-modal-total" class="text-xl font-bold text-brand-dark">Rs. 0.00</span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method *</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="pay-method" value="Cash" class="peer hidden" checked onchange="toggleCashFields()">
+                        <div class="text-center p-3 border border-gray-300 rounded-lg peer-checked:border-brand peer-checked:bg-red-50 peer-checked:text-brand font-medium text-sm transition">💵 Cash</div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="pay-method" value="Card" class="peer hidden" onchange="toggleCashFields()">
+                        <div class="text-center p-3 border border-gray-300 rounded-lg peer-checked:border-brand peer-checked:bg-red-50 peer-checked:text-brand font-medium text-sm transition">💳 Card</div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="pay-method" value="Bank Transfer" class="peer hidden" onchange="toggleCashFields()">
+                        <div class="text-center p-3 border border-gray-300 rounded-lg peer-checked:border-brand peer-checked:bg-red-50 peer-checked:text-brand font-medium text-sm transition">🏦 Bank Transfer</div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="pay-method" value="Cash On Delivery" class="peer hidden" onchange="toggleCashFields()">
+                        <div class="text-center p-3 border border-gray-300 rounded-lg peer-checked:border-brand peer-checked:bg-red-50 peer-checked:text-brand font-medium text-sm transition">🚚 COD</div>
+                    </label>
+                </div>
+            </div>
+
+            <div id="cash-payment-fields" class="space-y-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Amount Given (Rs.)</label>
+                    <input type="number" id="pay-amount-given" min="0" step="0.01" class="w-full border border-gray-300 rounded-lg p-3 text-lg font-bold focus:ring-2 focus:ring-brand focus:outline-none" oninput="calculateChange()">
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-100 rounded-lg border border-gray-300">
+                    <span class="text-sm font-bold text-gray-600">Change Due</span>
+                    <span id="pay-change-due" class="text-xl font-bold text-green-600">Rs. 0.00</span>
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-3">
+                <button type="button" onclick="closePaymentModal()" class="flex-1 px-4 py-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition">Cancel</button>
+                <button type="button" id="confirm-payment-btn" class="flex-1 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-bold transition shadow-md">Complete & Print</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Receipt Print Template (Hidden) -->
     <div id="print-receipt" class="hidden">
         <div style="width: 300px; padding: 20px; font-family: 'Courier New', Courier, monospace; color: #000; background: #fff;">
@@ -210,6 +262,10 @@
                 <p style="margin: 2px 0; font-size: 12px;">Discount: <span id="receipt-discount"></span></p>
                 <p style="margin: 2px 0; font-size: 12px;" id="receipt-delivery-row">Delivery: <span id="receipt-delivery"></span></p>
                 <h3 style="margin: 10px 0 0; font-size: 16px;">Total: <span id="receipt-total"></span></h3>
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #000;">
+                    <p style="margin: 2px 0; font-size: 12px;">Paid via <span id="receipt-method" style="font-weight:bold;"></span>: <span id="receipt-paid"></span></p>
+                    <p style="margin: 2px 0; font-size: 12px;" id="receipt-change-row">Change: <span id="receipt-change"></span></p>
+                </div>
             </div>
             <div style="text-align: center; margin-top: 20px; font-size: 12px;">
                 <p id="receipt-footer-msg" style="margin: 0; font-style: italic;">Thank you for shopping with us!</p>
