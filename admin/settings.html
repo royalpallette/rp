@@ -57,6 +57,46 @@
                 <form id="favicon-form" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Select Favicon (PNG/ICO/JPG)</label>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 bg-dark text-white flex flex-col">
+        <div class="h-20 flex items-center px-6 border-b border-gray-700">
+            <span class="text-2xl font-bold tracking-tight text-brand">Admin Panel</span>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="pos.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">POS Terminal</a>
+            <a href="items.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Manage Items</a>
+            <a href="images.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Product Images</a>
+            <a href="orders.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Orders</a>
+            <a href="settings.html" class="flex items-center px-4 py-3 bg-brand text-white rounded-lg shadow-md transition">Site Settings</a>
+        </nav>
+        <div class="p-4 border-t border-gray-800">
+            <button onclick="adminLogout()" class="block w-full text-left py-2 px-4 text-red-400 hover:text-red-300 hover:bg-gray-800 rounded transition">Logout</button>
+        </div>
+        <div class="p-4 border-t border-gray-700">
+            <a href="../index.html" class="text-sm text-gray-400 hover:text-white flex items-center gap-2">
+                &larr; Back to Shop
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden">
+        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm">
+            <h1 class="text-2xl font-semibold text-gray-800">Site Settings</h1>
+        </header>
+
+        <div class="flex-1 overflow-auto p-8">
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                
+                <h2 class="text-lg font-semibold mb-2">Update Website Logo / Favicon</h2>
+                <p class="text-sm text-gray-500 mb-6">This logo appears in the browser tab next to the page title.</p>
+
+                <form id="favicon-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Favicon (PNG/ICO/JPG)</label>
                         <input type="file" id="favicon-file" required accept=".png, .ico, .jpg, .jpeg" class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border border-gray-300 rounded-md">
                     </div>
                     <button type="submit" id="save-btn" class="w-full bg-brand text-white py-2 rounded-md hover:bg-brand-dark transition font-medium">Upload & Save Favicon</button>
@@ -70,12 +110,174 @@
                         <span id="favicon-url-text">Loading...</span>
                     </div>
                 </div>
+            </div>
 
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100 mt-8">
+                <h2 class="text-lg font-semibold mb-2">POS Receipt Settings</h2>
+                <p class="text-sm text-gray-500 mb-6">Customize the receipt printed from the POS system.</p>
+
+                <form id="receipt-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Shop Name</label>
+                        <input type="text" id="rec-shop-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand" placeholder="Royal Pallette">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Shop Address</label>
+                        <input type="text" id="rec-shop-address" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand" placeholder="123 Beauty Lane, Colombo">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        <input type="text" id="rec-shop-phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand" placeholder="011-2345678">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Footer Message</label>
+                        <input type="text" id="rec-footer-msg" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand" placeholder="Thank you for shopping with us!">
+                    </div>
+                    <button type="submit" id="save-receipt-btn" class="w-full bg-gray-800 text-white py-2 rounded-md hover:bg-gray-900 transition font-medium">Save Receipt Settings</button>
+                    <div id="receipt-status-msg" class="text-sm hidden mt-2"></div>
+                </form>
+            </div>
+            <!-- Manage Categories -->
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100 mt-8">
+                <h2 class="text-lg font-semibold mb-2">Manage Categories</h2>
+                <p class="text-sm text-gray-500 mb-4">View and delete existing categories. Warning: Deleting a category does not delete its items.</p>
+                <div class="flex gap-4 mb-4 border-b pb-2">
+                    <button class="cat-tab-btn active font-medium text-brand border-b-2 border-brand px-2" onclick="loadCatMan('dept')">Departments</button>
+                    <button class="cat-tab-btn text-gray-500 px-2" onclick="loadCatMan('main')">Main Categories</button>
+                    <button class="cat-tab-btn text-gray-500 px-2" onclick="loadCatMan('sub')">Sub Categories</button>
+                </div>
+                <div class="max-h-60 overflow-y-auto">
+                    <ul id="manage-cat-list" class="divide-y divide-gray-100">
+                        <li class="text-sm text-gray-500 py-2">Loading...</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Manage Customers -->
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100 mt-8 mb-8">
+                <h2 class="text-lg font-semibold mb-2">Manage Customers</h2>
+                <p class="text-sm text-gray-500 mb-4">View and remove registered customers.</p>
+                <div class="max-h-80 overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white">
+                            <tr class="bg-gray-50 text-gray-600 text-xs border-b">
+                                <th class="p-2 font-medium">Name</th>
+                                <th class="p-2 font-medium">Contact</th>
+                                <th class="p-2 font-medium">Location</th>
+                                <th class="p-2 font-medium text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manage-cust-list" class="divide-y divide-gray-100">
+                            <tr><td colspan="4" class="text-sm text-gray-500 py-4 text-center">Loading customers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
 
-    <script type="module">
+    <script>
+        const FB_URL = 'https://royal-pallette-default-rtdb.asia-southeast1.firebasedatabase.app';
+        let currentManageCatType = 'dept';
+
+        // --- Category Management ---
+        window.loadCatMan = async function(type) {
+            currentManageCatType = type;
+            document.querySelectorAll('.cat-tab-btn').forEach(btn => {
+                btn.classList.remove('text-brand', 'border-b-2', 'border-brand', 'font-medium');
+                btn.classList.add('text-gray-500');
+            });
+            event.currentTarget.classList.add('text-brand', 'border-b-2', 'border-brand', 'font-medium');
+            event.currentTarget.classList.remove('text-gray-500');
+
+            const list = document.getElementById('manage-cat-list');
+            list.innerHTML = '<li class="text-sm text-gray-500 py-2">Loading...</li>';
+            
+            try {
+                const res = await fetch(`${FB_URL}/settings/categories/${type}.json`);
+                const data = await res.json();
+                list.innerHTML = '';
+                if (!data) {
+                    list.innerHTML = '<li class="text-sm text-gray-500 py-2">No categories found.</li>';
+                    return;
+                }
+                
+                Object.entries(data).forEach(([id, cat]) => {
+                    list.innerHTML += `
+                        <li class="flex justify-between items-center py-2 text-sm">
+                            <span class="font-medium text-gray-700">${cat.name}</span>
+                            <button onclick="deleteCategory('${id}')" class="text-red-500 hover:text-red-700 text-xs px-2 py-1 rounded bg-red-50 hover:bg-red-100 transition">Delete</button>
+                        </li>
+                    `;
+                });
+            } catch (err) {
+                list.innerHTML = `<li class="text-sm text-red-500 py-2">Error: ${err.message}</li>`;
+            }
+        };
+
+        window.deleteCategory = async function(id) {
+            if(!confirm('Are you sure you want to delete this category?')) return;
+            try {
+                const res = await fetch(`${FB_URL}/settings/categories/${currentManageCatType}/${id}.json`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                loadCatMan(currentManageCatType);
+            } catch(e) { alert('Delete failed: ' + e.message); }
+        };
+
+        // --- Customer Management ---
+        window.loadCustMan = async function() {
+            const tbody = document.getElementById('manage-cust-list');
+            try {
+                const res = await fetch(`${FB_URL}/users.json`);
+                const data = await res.json();
+                tbody.innerHTML = '';
+                let hasCustomers = false;
+                if (data) {
+                    Object.entries(data).forEach(([id, user]) => {
+                        if (user.role === 'customer' || user.role === 'Customer') {
+                            hasCustomers = true;
+                            tbody.innerHTML += `
+                                <tr class="text-sm hover:bg-gray-50 transition">
+                                    <td class="p-2 font-medium text-gray-800">${user.username || '-'}</td>
+                                    <td class="p-2 text-gray-600">
+                                        ${user.phone ? `<div>📞 ${user.phone}</div>` : ''}
+                                        ${user.email ? `<div>✉️ ${user.email}</div>` : ''}
+                                    </td>
+                                    <td class="p-2 text-gray-600">
+                                        ${user.town ? user.town + ', ' : ''}${user.district || '-'}
+                                    </td>
+                                    <td class="p-2 text-right">
+                                        <button onclick="deleteCustomer('${id}')" class="text-red-500 hover:text-red-700 text-xs px-2 py-1 rounded bg-red-50 hover:bg-red-100 transition">Delete</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    });
+                }
+                if (!hasCustomers) tbody.innerHTML = '<tr><td colspan="4" class="text-sm text-gray-500 py-4 text-center">No customers found.</td></tr>';
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-sm text-red-500 py-4 text-center">Error: ${err.message}</td></tr>`;
+            }
+        };
+
+        window.deleteCustomer = async function(id) {
+            if(!confirm('Are you sure you want to delete this customer?')) return;
+            try {
+                const res = await fetch(`${FB_URL}/users/${id}.json`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                loadCustMan();
+            } catch(e) { alert('Delete failed: ' + e.message); }
+        };
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Mock event for initial load
+            window.event = { currentTarget: document.querySelector('.cat-tab-btn.active') };
+            loadCatMan('dept');
+            loadCustMan();
+        });
+    </script>
+
         import { storage, db } from '../js/firebase-config.js';
         import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
         import { ref as dbRef, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -127,6 +329,48 @@
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.textContent = 'Upload & Save Favicon';
+            }
+        });
+
+        // --- Receipt Settings Logic ---
+        const receiptForm = document.getElementById('receipt-form');
+        const recSaveBtn = document.getElementById('save-receipt-btn');
+        const recStatus = document.getElementById('receipt-status-msg');
+
+        onValue(dbRef(db, 'settings/receipt'), (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                document.getElementById('rec-shop-name').value = data.shopName || '';
+                document.getElementById('rec-shop-address').value = data.shopAddress || '';
+                document.getElementById('rec-shop-phone').value = data.shopPhone || '';
+                document.getElementById('rec-footer-msg').value = data.footerMsg || '';
+            }
+        });
+
+        receiptForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            recSaveBtn.disabled = true;
+            recSaveBtn.textContent = 'Saving...';
+            recStatus.classList.add('hidden');
+
+            const data = {
+                shopName: document.getElementById('rec-shop-name').value,
+                shopAddress: document.getElementById('rec-shop-address').value,
+                shopPhone: document.getElementById('rec-shop-phone').value,
+                footerMsg: document.getElementById('rec-footer-msg').value
+            };
+
+            try {
+                await set(dbRef(db, 'settings/receipt'), data);
+                recStatus.textContent = "✅ Receipt settings saved successfully!";
+                recStatus.className = "text-sm text-green-600 block mt-2";
+            } catch(error) {
+                console.error(error);
+                recStatus.textContent = "❌ Error saving: " + error.message;
+                recStatus.className = "text-sm text-red-600 block mt-2";
+            } finally {
+                recSaveBtn.disabled = false;
+                recSaveBtn.textContent = 'Save Receipt Settings';
             }
         });
     </script>

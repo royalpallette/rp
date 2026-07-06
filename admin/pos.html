@@ -81,9 +81,22 @@
 
             <!-- Cart Details (Right) -->
             <div class="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 shadow-lg z-10">
-                <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                    <h2 class="text-xl font-bold text-gray-800">Current Order</h2>
-                    <span class="bg-brand text-white text-xs px-2 py-1 rounded-md font-semibold">POS</span>
+                <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50 flex-col gap-3">
+                    <div class="flex justify-between w-full items-center">
+                        <h2 class="text-xl font-bold text-gray-800">Current Order</h2>
+                        <span class="bg-brand text-white text-xs px-2 py-1 rounded-md font-semibold">POS</span>
+                    </div>
+                    
+                    <div class="w-full">
+                        <label class="text-xs font-semibold text-gray-600 mb-1 block">Customer <span class="text-red-500">*</span></label>
+                        <div class="flex gap-2">
+                            <select id="pos-customer" class="flex-1 border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-brand">
+                                <option value="">Select Customer...</option>
+                                <option value="walk-in">Walk-in Customer</option>
+                            </select>
+                            <button type="button" onclick="openAddCustModal()" class="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-700 transition" title="Add New Customer">+</button>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="flex-1 overflow-y-auto p-4 space-y-3" id="pos-cart">
@@ -92,15 +105,19 @@
                 </div>
                 
                 <div class="p-6 border-t border-gray-200 bg-gray-50">
-                    <div class="flex justify-between text-gray-600 mb-2">
+                    <div class="flex justify-between text-gray-600 mb-2 text-sm">
                         <span>Subtotal</span>
                         <span id="pos-subtotal">Rs. 0.00</span>
                     </div>
-                    <div class="flex justify-between text-gray-600 mb-4">
-                        <span>Tax (0%)</span>
-                        <span>Rs. 0.00</span>
+                    <div class="flex justify-between text-gray-600 mb-2 text-sm items-center">
+                        <span>Discount (Rs.)</span>
+                        <input type="number" id="pos-discount" value="0" min="0" step="1" class="w-24 text-right border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-brand">
                     </div>
-                    <div class="flex justify-between text-2xl font-bold text-gray-900 mb-6 border-t pt-4 border-gray-300">
+                    <div class="flex justify-between text-gray-600 mb-2 text-sm items-center">
+                        <span>Delivery (Rs.)</span>
+                        <input type="number" id="pos-delivery" value="0" min="0" step="1" class="w-24 text-right border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-brand">
+                    </div>
+                    <div class="flex justify-between text-2xl font-bold text-gray-900 mb-4 border-t pt-4 border-gray-300">
                         <span>Total</span>
                         <span id="pos-total">Rs. 0.00</span>
                     </div>
@@ -116,6 +133,263 @@
             </div>
         </div>
     </main>
+
+    <div id="add-customer-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Add New Customer</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                    <input type="text" id="new-cust-name" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input type="email" id="new-cust-email" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <input type="text" id="new-cust-phone" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <input type="text" id="new-cust-address" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                    <input type="text" id="new-cust-country" value="Sri Lanka" readonly class="w-full border border-gray-300 rounded-lg p-2 bg-gray-100 text-gray-500 cursor-not-allowed">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                    <input type="text" id="new-cust-province" list="province-list" placeholder="Search Province..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" oninput="updateDistricts()">
+                    <datalist id="province-list"></datalist>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">District</label>
+                    <input type="text" id="new-cust-district" list="district-list" placeholder="Search District..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" oninput="updateTowns()" disabled>
+                    <datalist id="district-list"></datalist>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Town</label>
+                    <input type="text" id="new-cust-town" list="town-list" placeholder="Search Town..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" disabled>
+                    <datalist id="town-list"></datalist>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="closeAddCustModal()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Cancel</button>
+                <button type="button" onclick="saveNewCustomer()" id="save-cust-btn" class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition shadow-md">Save Customer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Print Template (Hidden) -->
+    <div id="print-receipt" class="hidden">
+        <div style="width: 300px; padding: 20px; font-family: 'Courier New', Courier, monospace; color: #000; background: #fff;">
+            <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
+                <h2 id="receipt-shop-name" style="margin: 0; font-size: 20px;">Royal Pallette</h2>
+                <p id="receipt-shop-address" style="margin: 5px 0 0; font-size: 12px;">Shop Address Here</p>
+                <p id="receipt-shop-phone" style="margin: 5px 0 0; font-size: 12px;">Tel: 000-0000000</p>
+            </div>
+            <div style="font-size: 12px; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 10px;">
+                <p style="margin: 2px 0;">Order No: <b id="receipt-order-no">#0000</b></p>
+                <p style="margin: 2px 0;">Date: <span id="receipt-date"></span></p>
+                <p style="margin: 2px 0;">Customer: <span id="receipt-customer"></span></p>
+            </div>
+            <table style="width: 100%; font-size: 12px; border-collapse: collapse; margin-bottom: 10px;">
+                <thead>
+                    <tr style="border-bottom: 1px dashed #000;">
+                        <th style="text-align: left; padding: 4px 0;">Item</th>
+                        <th style="text-align: center; padding: 4px 0;">Qty</th>
+                        <th style="text-align: right; padding: 4px 0;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="receipt-items"></tbody>
+            </table>
+            <div style="border-top: 1px dashed #000; padding-top: 10px; font-size: 14px; text-align: right;">
+                <p style="margin: 2px 0; font-size: 12px;">Subtotal: <span id="receipt-subtotal"></span></p>
+                <p style="margin: 2px 0; font-size: 12px;">Discount: <span id="receipt-discount"></span></p>
+                <p style="margin: 2px 0; font-size: 12px;" id="receipt-delivery-row">Delivery: <span id="receipt-delivery"></span></p>
+                <h3 style="margin: 10px 0 0; font-size: 16px;">Total: <span id="receipt-total"></span></h3>
+            </div>
+            <div style="text-align: center; margin-top: 20px; font-size: 12px;">
+                <p id="receipt-footer-msg" style="margin: 0; font-style: italic;">Thank you for shopping with us!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const POS_FB_URL = 'https://royal-pallette-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+        // Load customers from Firebase into the dropdown
+        async function loadCustomersDropdown() {
+            const select = document.getElementById('pos-customer');
+            const current = select.value;
+            select.innerHTML = '<option value="">Select Customer...</option><option value="Walk-in Customer">Walk-in Customer</option>';
+            try {
+                const res = await fetch(`${POS_FB_URL}/users.json`);
+                const data = await res.json();
+                if (data) {
+                    Object.values(data).forEach(user => {
+                        if (user.role === 'customer' || user.role === 'Customer') {
+                            const opt = document.createElement('option');
+                            opt.value = user.username + (user.phone ? ` (${user.phone})` : '');
+                            opt.textContent = user.username + (user.email ? ' - ' + user.email : '');
+                            select.appendChild(opt);
+                        }
+                    });
+                }
+                if (current) select.value = current;
+            } catch(e) { console.warn('Could not load customers:', e); }
+        }
+
+        // Sri Lanka Geography Data
+        const slGeo = {
+            "Western": {
+                "Colombo": ["Colombo 1-15", "Dehiwala", "Moratuwa", "Kotte", "Maharagama", "Nugegoda", "Homagama", "Avissawella", "Padukka", "Hanwella", "Piliyandala", "Boralesgamuwa", "Kolonnawa"],
+                "Gampaha": ["Gampaha", "Negombo", "Kelaniya", "Peliyagoda", "Wattala", "Kandana", "Ja-Ela", "Seeduwa", "Minuwangoda", "Veyangoda", "Nittambuwa", "Mirigama", "Kirindiwela", "Pugoda", "Kadawatha", "Ragama"],
+                "Kalutara": ["Kalutara", "Panadura", "Horana", "Bandaragama", "Matugama", "Aluthgama", "Beruwala", "Wadduwa", "Agalawatta"]
+            },
+            "Central": {
+                "Kandy": ["Kandy", "Gampola", "Nawalapitiya", "Peradeniya", "Katugastota", "Digana", "Kadugannawa", "Akurana", "Pilimathalawa"],
+                "Matale": ["Matale", "Dambulla", "Galewela", "Ukuwela", "Sigiriya", "Rattota"],
+                "Nuwara Eliya": ["Nuwara Eliya", "Hatton", "Talawakele", "Nanu Oya", "Ginigathena", "Norwood"]
+            },
+            "Southern": {
+                "Galle": ["Galle", "Ambalangoda", "Elpitiya", "Hikkaduwa", "Baddegama", "Karapitiya", "Ahangama", "Bentota"],
+                "Matara": ["Matara", "Weligama", "Dikwella", "Akuressa", "Deniyaya", "Kamburupitiya"],
+                "Hambantota": ["Hambantota", "Tangalle", "Beliatta", "Ambalantota", "Tissamaharama", "Walasmulla"]
+            },
+            "North Western": {
+                "Kurunegala": ["Kurunegala", "Kuliyapitiya", "Pannala", "Narammala", "Giriulla", "Wariyapola", "Polgahawela"],
+                "Puttalam": ["Puttalam", "Chilaw", "Nattandiya", "Wennappuwa", "Marawila", "Dankotuwa", "Kalpitiya"]
+            },
+            "Sabaragamuwa": {
+                "Ratnapura": ["Ratnapura", "Pelmadulla", "Balangoda", "Embilipitiya", "Eheliyagoda", "Kuruwita"],
+                "Kegalle": ["Kegalle", "Mawanella", "Warakapola", "Rambukkana", "Ruwanwella", "Yatiyantota", "Deraniyagala"]
+            },
+            "North Central": {
+                "Anuradhapura": ["Anuradhapura", "Kekirawa", "Thambuththegama", "Eppawala", "Medawachchiya", "Mihintale", "Nochchiyagama"],
+                "Polonnaruwa": ["Polonnaruwa", "Kaduruwela", "Hingurakgoda", "Medirigiriya", "Aralaganwila"]
+            },
+            "Uva": {
+                "Badulla": ["Badulla", "Bandarawela", "Haputale", "Welimada", "Mahiyanganaya", "Passara", "Ella"],
+                "Moneragala": ["Moneragala", "Bibile", "Wellawaya", "Buttala", "Kataragama"]
+            },
+            "Eastern": {
+                "Trincomalee": ["Trincomalee", "Kinniya", "Mutur", "Kantale"],
+                "Batticaloa": ["Batticaloa", "Kattankudy", "Eravur", "Valaichchenai"],
+                "Ampara": ["Ampara", "Kalmunai", "Samanthurai", "Akkaraipattu", "Pottuvil"]
+            },
+            "Northern": {
+                "Jaffna": ["Jaffna", "Chavakachcheri", "Point Pedro", "Valvettithurai", "Nallur"],
+                "Kilinochchi": ["Kilinochchi", "Paranthan", "Pooneryn"],
+                "Mannar": ["Mannar", "Murunkan", "Pesalai"],
+                "Vavuniya": ["Vavuniya", "Cheddikulam"],
+                "Mullaitivu": ["Mullaitivu", "Puthukkudiyiruppu"]
+            }
+        };
+
+        // Populate initial Provinces
+        function initGeoDropdowns() {
+            const provList = document.getElementById('province-list');
+            provList.innerHTML = '';
+            Object.keys(slGeo).forEach(prov => provList.innerHTML += `<option value="${prov}">`);
+        }
+
+        window.updateDistricts = function() {
+            const prov = document.getElementById('new-cust-province').value;
+            const distInput = document.getElementById('new-cust-district');
+            const distList = document.getElementById('district-list');
+            const townInput = document.getElementById('new-cust-town');
+            
+            distInput.value = '';
+            townInput.value = '';
+            distList.innerHTML = '';
+            document.getElementById('town-list').innerHTML = '';
+
+            if (slGeo[prov]) {
+                distInput.disabled = false;
+                Object.keys(slGeo[prov]).forEach(dist => distList.innerHTML += `<option value="${dist}">`);
+            } else {
+                distInput.disabled = true;
+                townInput.disabled = true;
+            }
+        };
+
+        window.updateTowns = function() {
+            const prov = document.getElementById('new-cust-province').value;
+            const dist = document.getElementById('new-cust-district').value;
+            const townInput = document.getElementById('new-cust-town');
+            const townList = document.getElementById('town-list');
+            
+            townInput.value = '';
+            townList.innerHTML = '';
+
+            if (slGeo[prov] && slGeo[prov][dist]) {
+                townInput.disabled = false;
+                slGeo[prov][dist].forEach(town => townList.innerHTML += `<option value="${town}">`);
+            } else {
+                townInput.disabled = true;
+            }
+        };
+
+        // Add Customer Modal
+        window.openAddCustModal = function() {
+            document.getElementById('add-customer-modal').classList.remove('hidden');
+            document.getElementById('add-customer-modal').classList.add('flex');
+            initGeoDropdowns();
+            setTimeout(() => document.getElementById('new-cust-name').focus(), 100);
+        };
+        window.closeAddCustModal = function() {
+            document.getElementById('add-customer-modal').classList.add('hidden');
+            document.getElementById('add-customer-modal').classList.remove('flex');
+        };
+        window.saveNewCustomer = async function() {
+            const name = document.getElementById('new-cust-name').value.trim();
+            const email = document.getElementById('new-cust-email').value.trim();
+            const phone = document.getElementById('new-cust-phone').value.trim();
+            const address = document.getElementById('new-cust-address').value.trim();
+            const country = document.getElementById('new-cust-country').value.trim();
+            const province = document.getElementById('new-cust-province').value.trim();
+            const district = document.getElementById('new-cust-district').value.trim();
+            const town = document.getElementById('new-cust-town').value.trim();
+
+            if (!name) { document.getElementById('new-cust-name').focus(); return alert('Name is required!'); }
+
+            const btn = document.getElementById('save-cust-btn');
+            btn.disabled = true; btn.textContent = 'Saving...';
+            try {
+                const res = await fetch(`${POS_FB_URL}/users.json`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: name, email, phone, 
+                        address, country, province, district, town,
+                        role: 'customer', createdAt: new Date().toISOString() 
+                    })
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                
+                // Clear fields
+                ['name','email','phone','address','province','district','town'].forEach(f => document.getElementById('new-cust-'+f).value = '');
+                document.getElementById('new-cust-district').disabled = true;
+                document.getElementById('new-cust-town').disabled = true;
+
+                closeAddCustModal();
+                await loadCustomersDropdown();
+                // Auto-select the last (newest) customer
+                const sel = document.getElementById('pos-customer');
+                sel.value = sel.options[sel.options.length - 1].value;
+            } catch(err) {
+                alert('Error: ' + err.message);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Save Customer';
+            }
+        };
+
+        // Load customers on page load
+        loadCustomersDropdown();
+    </script>
 
     <script type="module" src="../js/pos.js"></script>
 </body>

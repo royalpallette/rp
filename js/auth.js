@@ -3,7 +3,8 @@ import {
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
@@ -17,38 +18,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMsg = document.getElementById('error-message');
     const googleBtn = document.getElementById('google-btn');
 
-    const otpModal = document.getElementById('otp-modal');
-    const otpInput = document.getElementById('otp-input');
-    const otpError = document.getElementById('otp-error');
-    const verifyOtpBtn = document.getElementById('verify-otp-btn');
-    const cancelOtpBtn = document.getElementById('cancel-otp-btn');
-
     let isSignup = false;
-    let pendingSignupData = null;
-    let generatedOTP = "";
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypFPSA-hyV0Te9-_Fx1A0KTKCzY3Lt9yLSw52ODC-G2CghH3AlVP2x4dqnBhmNbZOlxw/exec";
 
     if (!toggleBtn) return; // Guard clause
 
-
-toggleBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    isSignup = !isSignup;
-    if (isSignup) {
-        formTitle.textContent = "Create an account";
-        submitBtn.textContent = "Sign Up";
-        signupFields.classList.remove('hidden');
-        toggleText.textContent = "Already have an account?";
-        toggleBtn.textContent = "Sign In";
-    } else {
-        formTitle.textContent = "Sign in to your account";
-        submitBtn.textContent = "Sign In";
-        signupFields.classList.add('hidden');
-        toggleText.textContent = "Don't have an account?";
-        toggleBtn.textContent = "Sign Up";
-    }
-    errorMsg.classList.add('hidden');
-});
+    toggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        isSignup = !isSignup;
+        if (isSignup) {
+            formTitle.textContent = "Create an account";
+            submitBtn.textContent = "Sign Up";
+            signupFields.classList.remove('hidden');
+            toggleText.textContent = "Already have an account?";
+            toggleBtn.textContent = "Sign In";
+        } else {
+            formTitle.textContent = "Sign in to your account";
+            submitBtn.textContent = "Sign In";
+            signupFields.classList.add('hidden');
+            toggleText.textContent = "Don't have an account?";
+            toggleBtn.textContent = "Sign Up";
+        }
+        errorMsg.classList.add('hidden');
+    });
 
     authForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -57,30 +48,31 @@ toggleBtn.addEventListener('click', (e) => {
         errorMsg.classList.add('hidden');
 
         try {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Processing...";
+
             if (isSignup) {
                 const username = document.getElementById('username').value;
                 const phone = document.getElementById('phone').value;
                 
-                pendingSignupData = { email, password, username, phone };
+                // Create user in Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
                 
-                // Generate a real 6-digit OTP
-                generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+                // Save additional user info in Realtime Database
+                await set(ref(db, "users/" + user.uid), {
+                    username: username,
+                    email: email,
+                    phone: phone,
+                    role: 'customer',
+                    createdAt: new Date().toISOString()
+                });
+
+                // Send Firebase Email Verification
+                await sendEmailVerification(user);
                 
-                // Send OTP via Google Apps Script (GET request - bypasses CORS issues)
-                try {
-                    const scriptUrl = `${GOOGLE_SCRIPT_URL}?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(generatedOTP)}`;
-                    fetch(scriptUrl, { mode: 'no-cors' });
-                    console.log(`[Google Script] OTP GET request sent for ${email}`);
-                    alert(`An OTP has been sent to your email (${email}). Please check your inbox.`);
-                } catch (err) {
-                    console.error("Error sending OTP:", err);
-                    alert("Failed to send OTP email. Please try again.");
-                }
-                
-                // Show OTP Modal
-                otpModal.classList.remove('hidden');
-                otpInput.value = '';
-                otpError.classList.add('hidden');
+                alert('Account created successfully! An email verification link has been sent to ' + email + '. Please check your inbox (and spam folder) to verify your account.');
+                window.location.href = '../index.html';
                 
             } else {
                 // Sign in directly
@@ -92,53 +84,11 @@ toggleBtn.addEventListener('click', (e) => {
             errorMsg.textContent = error.message;
             errorMsg.classList.remove('hidden');
             alert("Error: " + error.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = isSignup ? "Sign Up" : "Sign In";
         }
     });
-
-if (verifyOtpBtn) {
-    verifyOtpBtn.addEventListener('click', async () => {
-        const enteredCode = otpInput.value.trim();
-        if (enteredCode === generatedOTP && pendingSignupData) {
-            verifyOtpBtn.disabled = true;
-            verifyOtpBtn.textContent = 'Verifying...';
-            otpError.classList.add('hidden');
-
-            try {
-                // Create user in Firebase Auth
-                const userCredential = await createUserWithEmailAndPassword(auth, pendingSignupData.email, pendingSignupData.password);
-                const user = userCredential.user;
-                
-                // Save additional user info in Realtime Database
-                await set(ref(db, "users/" + user.uid), {
-                    username: pendingSignupData.username,
-                    email: pendingSignupData.email,
-                    phone: pendingSignupData.phone,
-                    role: 'customer',
-                    createdAt: new Date().toISOString()
-                });
-                
-                alert('Account created and verified successfully!');
-                window.location.href = '../index.html';
-            } catch (error) {
-                console.error("Signup Error:", error);
-                otpError.textContent = error.message;
-                otpError.classList.remove('hidden');
-                verifyOtpBtn.disabled = false;
-                verifyOtpBtn.textContent = 'Verify & Create Account';
-            }
-        } else {
-            otpError.classList.remove('hidden');
-        }
-    });
-}
-
-if (cancelOtpBtn) {
-    cancelOtpBtn.addEventListener('click', () => {
-        otpModal.classList.add('hidden');
-        pendingSignupData = null;
-        generatedOTP = "";
-    });
-}
 
     // Google Sign In
     if (googleBtn) {

@@ -26,6 +26,15 @@ if (productGrid) {
 
 async function loadProducts() {
     try {
+        // Fetch product images first
+        let productImagesCache = {};
+        const imagesSnapshot = await get(ref(db, "product_images"));
+        if (imagesSnapshot.exists()) {
+            imagesSnapshot.forEach(child => {
+                productImagesCache[child.key] = child.val().imageBase64 || '';
+            });
+        }
+
         const snapshot = await get(ref(db, "products"));
         productGrid.innerHTML = ''; // Clear loading state
         
@@ -37,15 +46,30 @@ async function loadProducts() {
         snapshot.forEach((childSnapshot) => {
             const docId = childSnapshot.key;
             const product = childSnapshot.val();
+
+            if (product.showOnWebsite === false) {
+                return; // Skip POS-only products
+            }
+
+            let imgSrc = 'https://via.placeholder.com/300x400?text=No+Image';
+            if (product.imageCode && productImagesCache[product.imageCode]) {
+                imgSrc = productImagesCache[product.imageCode];
+            } else if (product.imageUrl) {
+                imgSrc = product.imageUrl;
+            }
+
             const productCard = document.createElement('div');
             productCard.className = 'bg-white rounded-xl overflow-hidden shadow-sm card-hover border border-gray-100';
             productCard.innerHTML = `
                 <div class="h-64 bg-gray-200 relative">
-                    <img src="${product.imageUrl || 'https://via.placeholder.com/300x400?text=No+Image'}" alt="${product.name}" class="w-full h-full object-cover">
+                    <img src="${imgSrc}" alt="${product.name}" class="w-full h-full object-cover">
                     ${product.isNew ? '<span class="absolute top-2 left-2 bg-brand text-white text-xs font-bold px-2 py-1 rounded">NEW</span>' : ''}
                 </div>
                 <div class="p-5">
-                    <p class="text-xs text-brand mb-1 font-medium tracking-wide uppercase">${product.category || 'Beauty'}</p>
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-xs text-brand font-medium tracking-wide uppercase">${product.category || 'Beauty'}</p>
+                        <span class="text-[10px] text-gray-400 font-bold">${product.productCode || ''}</span>
+                    </div>
                     <h3 class="text-lg font-bold text-gray-900 mb-1">${product.name}</h3>
                     <p class="text-gray-500 text-sm mb-4 line-clamp-2">${product.description || ''}</p>
                     <div class="flex justify-between items-center mt-4">

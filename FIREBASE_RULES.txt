@@ -1,0 +1,26 @@
+Firebase Storage Rules - Firebase Console ඇතුළේ Set කළ යුතු නීති:
+
+================================================
+Storage Rules (Firebase Console > Storage > Rules)
+================================================
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
+
+================================================
+Realtime Database Rules (Firebase Console > Realtime Database > Rules)
+================================================
+
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}

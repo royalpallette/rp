@@ -7,21 +7,35 @@ const adminLoginForm = document.getElementById('admin-login-form');
 if (adminLoginForm) {
     adminLoginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const user = document.getElementById('admin-username').value;
+        const user = document.getElementById('admin-username').value.trim();
         const pass = document.getElementById('admin-password').value;
         const err = document.getElementById('admin-error');
-        
-        if (user === ADMIN_USER && pass === ADMIN_PASS) {
-            sessionStorage.setItem('admin_logged_in', 'true');
-            window.location.href = 'pos.html';
-        } else {
-            err.classList.remove('hidden');
-        }
+        const btn = document.getElementById('login-btn');
+
+        // Show loading
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Verifying...';
+
+        setTimeout(() => {
+            if (user === ADMIN_USER && pass === ADMIN_PASS) {
+                sessionStorage.setItem('admin_logged_in', 'true');
+                btn.innerHTML = '✅ Access Granted!';
+                setTimeout(() => {
+                    window.location.href = 'pos.html';
+                }, 600);
+            } else {
+                err.classList.add('show');
+                btn.disabled = false;
+                btn.innerHTML = 'Login to Dashboard';
+                // Clear password field on failure
+                document.getElementById('admin-password').value = '';
+                document.getElementById('admin-password').focus();
+            }
+        }, 800);
     });
 }
 
-// 2. Protect Admin Pages
-// Call this function at the top of protected admin pages (pos, items, orders)
+// 2. Protect Admin Pages - Call at top of every protected page
 window.checkAdminAuth = function() {
     if (sessionStorage.getItem('admin_logged_in') !== 'true') {
         window.location.replace('login.html');

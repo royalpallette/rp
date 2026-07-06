@@ -43,6 +43,34 @@
         <header class="h-20 bg-white border-b border-gray-200 flex items-center px-8 shadow-sm justify-between">
             <h1 class="text-2xl font-semibold text-gray-800">Order Management</h1>
         </header>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 bg-dark text-white flex flex-col">
+        <div class="h-20 flex items-center px-6 border-b border-gray-700">
+            <span class="text-2xl font-bold tracking-tight text-brand">Admin Panel</span>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="pos.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">POS Terminal</a>
+            <a href="items.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Manage Items</a>
+            <a href="orders.html" class="flex items-center px-4 py-3 bg-brand text-white rounded-lg shadow-md transition">Orders</a>
+        </nav>
+        <div class="p-4 border-t border-gray-800">
+            <button onclick="adminLogout()" class="block w-full text-left py-2 px-4 text-red-400 hover:text-red-300 hover:bg-gray-800 rounded transition">Logout</button>
+        </div>
+        <div class="p-4 border-t border-gray-700">
+            <a href="../index.html" class="text-sm text-gray-400 hover:text-white flex items-center gap-2">
+                &larr; Back to Shop
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden">
+        <header class="h-20 bg-white border-b border-gray-200 flex items-center px-8 shadow-sm justify-between">
+            <h1 class="text-2xl font-semibold text-gray-800">Order Management</h1>
+        </header>
 
         <div class="flex-1 overflow-auto p-8">
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -51,15 +79,16 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 text-sm border-b">
-                                <th class="p-3 font-medium">Order ID</th>
+                                <th class="p-3 font-medium">Order No</th>
                                 <th class="p-3 font-medium">Date</th>
+                                <th class="p-3 font-medium">Customer</th>
                                 <th class="p-3 font-medium">Source</th>
                                 <th class="p-3 font-medium">Status</th>
                                 <th class="p-3 font-medium text-right">Total</th>
                             </tr>
                         </thead>
                         <tbody id="orders-list" class="divide-y divide-gray-100">
-                            <tr><td colspan="5" class="p-4 text-center text-gray-500 text-sm">Loading orders...</td></tr>
+                            <tr><td colspan="6" class="p-4 text-center text-gray-500 text-sm">Loading orders...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -76,7 +105,7 @@
         onValue(ref(db, "orders"), (snapshot) => {
             ordersList.innerHTML = '';
             if (!snapshot.exists()) {
-                ordersList.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500 text-sm">No orders found.</td></tr>';
+                ordersList.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500 text-sm">No orders found.</td></tr>';
                 return;
             }
 
@@ -98,11 +127,15 @@
                     ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">Completed</span>'
                     : '<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium">Pending</span>';
 
+                const displayId = order.orderNo ? `#${order.orderNo}` : `${order.id.substring(0,8)}`;
+                const customerDisplay = order.customer || 'Guest';
+
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-50 border-b";
                 tr.innerHTML = `
-                    <td class="p-3 text-sm text-gray-500 font-mono">${order.id.substring(0,8)}...</td>
+                    <td class="p-3 text-sm text-gray-500 font-bold">${displayId}</td>
                     <td class="p-3 text-sm text-gray-900">${date}</td>
+                    <td class="p-3 text-sm text-gray-700">${customerDisplay}</td>
                     <td class="p-3 text-sm">${sourceBadge}</td>
                     <td class="p-3 text-sm">${statusBadge}</td>
                     <td class="p-3 text-sm text-right font-bold text-gray-900">Rs. ${order.total.toFixed(2)}</td>

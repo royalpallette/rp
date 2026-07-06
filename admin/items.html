@@ -21,7 +21,6 @@
     </style>
     <script src="../js/admin_auth.js"></script>
     <script> checkAdminAuth(); </script>
-<script type="module" src="../js/favicon.js"></script>
 </head>
 <body class="text-gray-800 antialiased flex h-screen overflow-hidden">
     
@@ -34,6 +33,7 @@
             <a href="pos.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">POS Terminal</a>
             <a href="items.html" class="flex items-center px-4 py-3 bg-brand text-white rounded-lg shadow-md transition">Manage Items</a>
             <a href="orders.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Orders</a>
+            <a href="settings.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Settings</a>
         </nav>
         <div class="p-4 border-t border-gray-800">
             <button onclick="adminLogout()" class="block w-full text-left py-2 px-4 text-red-400 hover:text-red-300 hover:bg-gray-800 rounded transition">Logout</button>
@@ -59,6 +59,10 @@
                     <h2 class="text-lg font-semibold mb-4 border-b pb-2">Add New Item</h2>
                     <form id="add-item-form" class="space-y-4">
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Product Code / Barcode</label>
+                            <input type="text" id="item-product-code" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand" placeholder="e.g. P1001">
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
                             <input type="text" id="item-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand">
                         </div>
@@ -81,6 +85,46 @@
                             </div>
                         </div>
 
+                        <!-- Categories -->
+                        <div class="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="flex items-end gap-2">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                                    <select id="item-dept" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand">
+                                        <option value="">Select Department...</option>
+                                    </select>
+                                </div>
+                                <button type="button" onclick="addNewCategory('dept')" class="bg-gray-800 text-white px-3 py-2 rounded-md text-sm hover:bg-gray-700 transition" title="Add New">+</button>
+                            </div>
+                            <div class="flex items-end gap-2">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Main Category</label>
+                                    <select id="item-main-cat" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand">
+                                        <option value="">Select Main Category...</option>
+                                    </select>
+                                </div>
+                                <button type="button" onclick="addNewCategory('main')" class="bg-gray-800 text-white px-3 py-2 rounded-md text-sm hover:bg-gray-700 transition" title="Add New">+</button>
+                            </div>
+                            <div class="flex items-end gap-2">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Sub Category</label>
+                                    <select id="item-sub-cat" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand">
+                                        <option value="">Select Sub Category...</option>
+                                    </select>
+                                </div>
+                                <button type="button" onclick="addNewCategory('sub')" class="bg-gray-800 text-white px-3 py-2 rounded-md text-sm hover:bg-gray-700 transition" title="Add New">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Visibility Setting -->
+                        <div class="flex items-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+                            <input type="checkbox" id="item-show-web" checked class="w-4 h-4 text-brand bg-white border-gray-300 rounded focus:ring-brand focus:ring-2 cursor-pointer">
+                            <label for="item-show-web" class="ml-2 text-sm font-medium text-blue-900 cursor-pointer">
+                                Show on public website
+                                <span class="block text-xs text-blue-600 font-normal">If unchecked, this item will only be visible in the POS terminal.</span>
+                            </label>
+                        </div>
+
                         <!-- Image Section -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
@@ -101,227 +145,508 @@
                                 </button>
                             </div>
 
-                            <!-- Tab: Browse File -->
-                            <div id="panel-browse">
-                                <input type="file" id="item-file" accept="image/*" class="w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-brand file:text-white hover:file:bg-brand-dark cursor-pointer">
-                                <p class="text-xs text-gray-400 mt-1">Saves as local base64. For better performance, use 'Product Images' page to upload to Cloud, then use 'Get From Our Web'.</p>
+                            <!-- Tab Contents -->
+                            <div id="content-browse" class="tab-content">
+                                <input type="file" id="item-image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
                             </div>
-
-                            <!-- Tab: Get From Our Web -->
-                            <div id="panel-cloud" class="hidden">
+                            
+                            <div id="content-cloud" class="tab-content hidden">
                                 <div class="flex gap-2">
-                                    <input type="text" id="cloud-code" placeholder="Enter Item Code (e.g. 1001)" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand">
-                                    <button type="button" id="cloud-btn" class="px-3 py-2 bg-dark text-white rounded-md text-sm hover:bg-black transition whitespace-nowrap">Fetch</button>
+                                    <input type="text" id="item-image-code" placeholder="Enter Product Code (e.g. 101)" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none text-sm">
+                                    <button type="button" onclick="fetchImageFromCloud()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm whitespace-nowrap transition">Fetch Image</button>
                                 </div>
-                                <p id="cloud-result" class="text-xs mt-1 text-gray-500">Retrieves from Firebase Cloud Storage.</p>
+                                <p class="text-xs text-gray-500 mt-1">This will fetch the image uploaded via the "Product Images" page using its unique code.</p>
                             </div>
-
-                            <!-- Tab: Search by Code -->
-                            <div id="panel-search" class="hidden">
+                            
+                            <div id="content-search" class="tab-content hidden">
                                 <div class="flex gap-2">
-                                    <input type="text" id="item-barcode" placeholder="Enter barcode / product code" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand">
-                                    <button type="button" id="search-btn" onclick="searchProduct()" class="px-3 py-2 bg-dark text-white rounded-md text-sm hover:bg-black transition whitespace-nowrap">Search</button>
+                                    <input type="text" id="search-barcode" placeholder="Enter barcode / product name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none text-sm">
+                                    <button type="button" id="search-online-btn" onclick="searchOnline()" class="bg-gray-800 hover:bg-gray-900 text-white px-3 py-2 rounded-md text-sm whitespace-nowrap transition">Search</button>
                                 </div>
-                                <div id="search-result" class="mt-2 text-xs text-gray-500 hidden"></div>
+                                <p id="search-result-msg" class="text-xs mt-2 hidden"></p>
                             </div>
-
-                            <!-- Tab: URL -->
-                            <div id="panel-url" class="hidden">
-                                <input type="url" id="item-image-url" placeholder="https://example.com/image.jpg" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand">
+                            
+                            <div id="content-url" class="tab-content hidden">
+                                <div class="flex gap-2">
+                                    <input type="url" id="item-image-url" placeholder="https://example.com/image.jpg" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none text-sm">
+                                    <button type="button" onclick="previewUrl()" class="bg-gray-800 text-white px-3 py-2 rounded-md text-sm whitespace-nowrap transition">Preview</button>
+                                </div>
                             </div>
+                            
+                            <!-- Advanced Image Editor UI -->
+                            <div id="editor-ui" class="mt-4 hidden border border-gray-300 rounded-lg overflow-hidden bg-white">
+                                <!-- Toolbar -->
+                                <div class="bg-gray-50 border-b border-gray-200 p-2 flex flex-wrap gap-2 items-center justify-between">
+                                    <div class="flex gap-2">
+                                        <button type="button" id="start-cam-btn" class="bg-gray-800 text-white px-3 py-1.5 text-xs rounded shadow hover:bg-gray-900 transition flex items-center gap-1">📸 Camera</button>
+                                        <button type="button" id="crop-btn" class="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 text-xs rounded hover:bg-gray-50 transition">✂️ Crop</button>
+                                        <button type="button" id="add-logo-btn" class="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 text-xs rounded hover:bg-gray-50 transition">👑 Add Logo</button>
+                                        <button type="button" id="add-text-btn" class="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 text-xs rounded hover:bg-gray-50 transition">📝 Add Text</button>
+                                    </div>
+                                    <button type="button" id="reset-canvas-btn" class="text-xs text-red-500 hover:text-red-700 px-2 py-1">Reset</button>
+                                </div>
+                                
+                                <!-- Text Options (Hidden by default) -->
+                                <div id="text-tool-options" class="bg-white border-b border-gray-200 p-2 hidden flex items-center gap-2">
+                                    <input type="text" id="overlay-text" placeholder="Enter text..." class="flex-1 text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-brand">
+                                    <input type="color" id="overlay-color" value="#ffffff" class="w-8 h-8 rounded cursor-pointer">
+                                    <select id="overlay-size" class="text-sm border border-gray-300 rounded px-2 py-1">
+                                        <option value="20px">Small</option>
+                                        <option value="30px" selected>Medium</option>
+                                        <option value="50px">Large</option>
+                                    </select>
+                                    <button type="button" id="apply-text-btn" class="bg-brand text-white px-3 py-1 text-xs rounded font-semibold">Apply</button>
+                                    <button type="button" id="cancel-text-btn" class="text-gray-500 text-xs hover:text-gray-800">Cancel</button>
+                                </div>
 
-                            <!-- Image Preview -->
-                            <div id="img-preview" class="mt-3 rounded-lg overflow-hidden border border-gray-200">
-                                <img id="preview-img" src="" alt="Preview" class="w-full h-36 object-cover">
+                                <!-- Canvas Area -->
+                                <div class="flex-1 bg-gray-100 flex flex-col items-center justify-center p-4 relative overflow-hidden" id="canvas-container" style="min-height: 250px;">
+                                    <canvas id="editor-canvas" class="relative z-10 hidden"></canvas>
+                                    
+                                    <!-- Cropping Overlay Mask -->
+                                    <div id="crop-overlay" class="absolute inset-0 z-20 pointer-events-none hidden">
+                                        <div id="crop-box" class="absolute border-2 border-brand border-dashed bg-brand bg-opacity-20 pointer-events-auto cursor-move" style="left:10%; top:10%; width:80%; height:80%;">
+                                            <div class="w-3 h-3 bg-brand absolute -top-1.5 -left-1.5 cursor-nwse-resize handle" data-pos="tl"></div>
+                                            <div class="w-3 h-3 bg-brand absolute -top-1.5 -right-1.5 cursor-nesw-resize handle" data-pos="tr"></div>
+                                            <div class="w-3 h-3 bg-brand absolute -bottom-1.5 -left-1.5 cursor-nesw-resize handle" data-pos="bl"></div>
+                                            <div class="w-3 h-3 bg-brand absolute -bottom-1.5 -right-1.5 cursor-nwse-resize handle" data-pos="br"></div>
+                                        </div>
+                                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 pointer-events-auto">
+                                            <button type="button" id="apply-crop-btn" class="bg-green-500 text-white px-3 py-1 text-xs rounded shadow hover:bg-green-600">Apply Crop</button>
+                                            <button type="button" id="cancel-crop-btn" class="bg-red-500 text-white px-3 py-1 text-xs rounded shadow hover:bg-red-600">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <!-- Categorization -->
-                        <div class="pt-2">
-                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Categorization</h3>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block text-xs text-gray-500 mb-1">Department</label>
-                                    <input type="text" id="item-dept" required placeholder="e.g. Cosmetics" class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-500 mb-1">Main Category</label>
-                                    <input type="text" id="item-main-cat" required placeholder="e.g. Face Makeup" class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand">
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-500 mb-1">Sub Category</label>
-                                    <input type="text" id="item-sub-cat" placeholder="e.g. Foundation" class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-brand">
-                                </div>
-                            </div>
-                        </div>
 
-                        <button type="submit" id="add-btn" class="w-full mt-4 bg-dark text-white py-2 rounded-md hover:bg-black transition font-medium">Add Item to DB</button>
-                        <div id="status-msg" class="text-sm text-center hidden"></div>
+                        <div id="status-msg" class="hidden text-sm text-center font-medium mt-2"></div>
+                        <button type="submit" id="add-btn" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-2.5 rounded-md transition shadow-sm">
+                            Add Item to DB
+                        </button>
                     </form>
                 </div>
 
-                <!-- Items List -->
+                <!-- Inventory List -->
                 <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 class="text-lg font-semibold mb-4 border-b pb-2">Current Inventory</h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
+                    <div class="overflow-x-auto h-[600px]">
+                        <table class="w-full text-left border-collapse relative">
+                            <thead class="sticky top-0 bg-white shadow-sm z-10">
                                 <tr class="bg-gray-50 text-gray-600 text-sm border-b">
+                                    <th class="p-3 font-medium">Image</th>
                                     <th class="p-3 font-medium">Name</th>
                                     <th class="p-3 font-medium">Category</th>
                                     <th class="p-3 font-medium">Price</th>
-                                    <th class="p-3 font-medium">Sale</th>
-                                    <th class="p-3 font-medium text-right">Actions</th>
+                                    <th class="p-3 font-medium">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="inventory-list" class="divide-y divide-gray-100">
-                                <tr><td colspan="5" class="p-4 text-center text-gray-500 text-sm">Loading items...</td></tr>
+                                <tr><td colspan="5" class="p-4 text-center text-gray-500 text-sm">Loading inventory...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
     </main>
 
-    <script type="module">
-        import { storage } from '../js/firebase-config.js';
-        import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    <!-- Camera Modal -->
+    <div id="camera-modal" class="fixed inset-0 bg-black bg-opacity-90 hidden items-center justify-center z-50 flex-col">
+        <div class="bg-dark p-4 rounded-xl max-w-3xl w-full mx-4 shadow-2xl relative">
+            <button type="button" id="close-cam-btn" class="absolute -top-4 -right-4 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow hover:bg-red-600 transition">&times;</button>
+            <div class="rounded-lg overflow-hidden bg-black aspect-video relative flex items-center justify-center">
+                <video id="webcam-video" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                <div id="cam-loading" class="text-white flex flex-col items-center">
+                    <svg class="animate-spin h-8 w-8 text-brand mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Requesting Camera...
+                </div>
+            </div>
+            <div class="mt-6 flex justify-center">
+                <button type="button" id="capture-btn" class="bg-brand text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-brand-dark transition transform hover:scale-105 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Snap Photo
+                </button>
+            </div>
+        </div>
+    </div>
 
-        // Expose to window for inline scripts
-        window.activeTab = 'browse';
-        window.resolvedImageUrl = '';
+    <!-- Category Modal -->
+    <div id="category-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4" id="cat-modal-title">Add New Category</h3>
+            <input type="text" id="new-cat-name" placeholder="Name" class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-brand mb-4">
+            <div class="flex justify-end gap-3">
+                <button onclick="closeCategoryModal()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Cancel</button>
+                <button onclick="saveNewCategory()" class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition shadow-md">Save</button>
+            </div>
+        </div>
+    </div>
 
-        window.switchTab = function(tab) {
-            window.activeTab = tab;
-            ['browse', 'cloud', 'search', 'url'].forEach(t => {
-                document.getElementById('panel-' + t).classList.add('hidden');
-                document.getElementById('tab-' + t).classList.remove('active');
-                document.getElementById('tab-' + t).classList.add('bg-gray-100');
-            });
-            document.getElementById('panel-' + tab).classList.remove('hidden');
-            document.getElementById('tab-' + tab).classList.add('active');
-            document.getElementById('tab-' + tab).classList.remove('bg-gray-100');
+    <script>
+        // Firebase REST API base URL (no SDK needed)
+        const FB_URL = 'https://royal-pallette-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+        // Load categories from Firebase and populate dropdowns
+        async function loadCategories() {
+            try {
+                const res = await fetch(`${FB_URL}/settings/categories.json`);
+                const data = await res.json();
+                const deptSel = document.getElementById('item-dept');
+                const mainSel = document.getElementById('item-main-cat');
+                const subSel = document.getElementById('item-sub-cat');
+                const deptVal = deptSel.value, mainVal = mainSel.value, subVal = subSel.value;
+
+                deptSel.innerHTML = '<option value="">Select Department...</option>';
+                mainSel.innerHTML = '<option value="">Select Main Category...</option>';
+                subSel.innerHTML = '<option value="">Select Sub Category...</option>';
+
+                if (data) {
+                    if (data.dept) Object.values(data.dept).forEach(c => deptSel.innerHTML += `<option value="${c.name}">${c.name}</option>`);
+                    if (data.main) Object.values(data.main).forEach(c => mainSel.innerHTML += `<option value="${c.name}">${c.name}</option>`);
+                    if (data.sub)  Object.values(data.sub).forEach(c => subSel.innerHTML += `<option value="${c.name}">${c.name}</option>`);
+                }
+                deptSel.value = deptVal; mainSel.value = mainVal; subSel.value = subVal;
+            } catch(e) { console.warn('Could not load categories:', e); }
         }
 
-        // Browse file preview
-        document.getElementById('item-file').addEventListener('change', function() {
-            const file = this.files[0];
+        // Load categories on page load
+        loadCategories();
+
+        // Category Management Logic
+        let currentCatType = '';
+        const catModal = document.getElementById('category-modal');
+        const catNameInput = document.getElementById('new-cat-name');
+
+        
+        window.addNewCategory = function(type) {
+            currentCatType = type;
+            let title = '';
+            if(type === 'dept') title = 'Add Department';
+            else if(type === 'main') title = 'Add Main Category';
+            else if(type === 'sub') title = 'Add Sub Category';
+            
+            document.getElementById('cat-modal-title').textContent = title;
+            catNameInput.value = '';
+            catModal.classList.remove('hidden');
+            catModal.classList.add('flex');
+            setTimeout(() => catNameInput.focus(), 100);
+        };
+
+        window.closeCategoryModal = function() {
+            catModal.classList.add('hidden');
+            catModal.classList.remove('flex');
+        };
+
+        window.saveNewCategory = async function() {
+            const name = catNameInput.value.trim();
+            if (!name) { catNameInput.focus(); return; }
+
+            const saveBtn = document.querySelector('#category-modal button:last-child');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            try {
+                // Use Firebase REST API POST (generates auto-id like push())
+                const res = await fetch(`${FB_URL}/settings/categories/${currentCatType}.json`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, createdAt: new Date().toISOString() })
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                closeCategoryModal();
+                await loadCategories(); // Refresh dropdowns immediately
+            } catch (err) {
+                console.error('Error saving category:', err);
+                alert('Error saving: ' + err.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save';
+            }
+        };
+
+        // Allow pressing Enter in the modal input
+        catNameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') window.saveNewCategory();
+        });
+
+
+        // Tab Switching logic
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active', 'bg-white', 'text-gray-800'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.add('bg-gray-100', 'text-gray-600'));
+            
+            const activeBtn = document.getElementById('tab-' + tabId);
+            activeBtn.classList.add('active', 'bg-white', 'text-gray-800', 'border', 'border-gray-300');
+            activeBtn.classList.remove('bg-gray-100', 'text-gray-600');
+
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById('content-' + tabId).classList.remove('hidden');
+        };
+
+        window.removeImage = function() {
+            const fileInput = document.getElementById('item-image');
+            if (fileInput) fileInput.value = '';
+            const urlInput = document.getElementById('item-image-url');
+            if (urlInput) urlInput.value = '';
+            document.getElementById('img-preview').classList.remove('show');
+            window.resolvedImageUrl = '';
+        };
+
+        window.showPreview = function(url) {
+            document.getElementById('preview-img').src = url;
+            document.getElementById('img-preview').classList.add('show');
+        };
+
+        window.previewUrl = function() {
+            const url = document.getElementById('item-image-url').value;
+            if (url) {
+                window.resolvedImageUrl = url;
+                showPreview(url);
+            }
+        };
+
+        window.searchOnline = async function() {
+            const code = document.getElementById('search-barcode').value.trim();
+            if (!code) return;
+            const btn = document.getElementById('search-online-btn');
+            const resultEl = document.getElementById('search-result-msg');
+            btn.textContent = 'Searching...'; btn.disabled = true;
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = 'Searching...'; resultEl.className = 'mt-2 text-xs text-gray-500';
+            try {
+                const res = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`);
+                const data = await res.json();
+                if (data.status === 1 && data.product) {
+                    const imgUrl = data.product.image_url || data.product.image_front_url || '';
+                    if (imgUrl) {
+                        window.resolvedImageUrl = imgUrl; showPreview(imgUrl);
+                        if (!document.getElementById('item-name').value && data.product.product_name)
+                            document.getElementById('item-name').value = data.product.product_name;
+                        resultEl.textContent = `✅ Found: ${data.product.product_name || 'Product'}`;
+                        resultEl.className = 'mt-2 text-xs text-green-600';
+                    } else { resultEl.textContent = '⚠️ No image available.'; resultEl.className = 'mt-2 text-xs text-yellow-600'; }
+                } else {
+                    const res2 = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+                    const data2 = await res2.json();
+                    if (data2.status === 1 && data2.product && data2.product.image_url) {
+                        window.resolvedImageUrl = data2.product.image_url; showPreview(window.resolvedImageUrl);
+                        if (!document.getElementById('item-name').value && data2.product.product_name)
+                            document.getElementById('item-name').value = data2.product.product_name;
+                        resultEl.textContent = `✅ Found: ${data2.product.product_name || 'Product'}`;
+                        resultEl.className = 'mt-2 text-xs text-green-600';
+                    } else { resultEl.textContent = '❌ Not found. Try URL tab.'; resultEl.className = 'mt-2 text-xs text-red-500'; }
+                }
+            } catch (err) { resultEl.textContent = '❌ Search failed.'; resultEl.className = 'mt-2 text-xs text-red-500'; }
+            finally { btn.textContent = 'Search'; btn.disabled = false; }
+        };
+
+        // Fetch image from product_images DB using a code
+        window.fetchImageFromCloud = async function() {
+            const code = document.getElementById('item-image-code').value.trim();
+            if (!code) { alert('Please enter an Item Code first.'); return; }
+
+            const btn = document.querySelector('#content-cloud button');
+            btn.textContent = 'Fetching...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${FB_URL}/product_images/${code}.json`);
+                const data = await res.json();
+                if (data && data.imageBase64) {
+                    window.resolvedImageUrl = data.imageBase64;
+                    showPreview(data.imageBase64);
+                    document.getElementById('item-image-code').style.borderColor = '#22c55e';
+                } else {
+                    alert(`No image found for code "${code}". Please upload it first via Product Images page.`);
+                    document.getElementById('item-image-code').style.borderColor = '#ef4444';
+                }
+            } catch (err) {
+                alert('Error fetching image: ' + err.message);
+            } finally {
+                btn.textContent = 'Fetch Image';
+                btn.disabled = false;
+            }
+        };
+
+        // --- Inline Canvas Image Editor Logic ---
+        const canvas = document.getElementById('editor-canvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+        const canvasContainer = document.getElementById('canvas-container');
+        const editorUi = document.getElementById('editor-ui');
+        
+        let originalImage = null;
+        let currentImage = null;
+        let stream = null;
+        let isCropping = false;
+
+        // Display Editor UI and Load Canvas
+        function loadToCanvas(dataUrl) {
+            const img = new Image();
+            img.onload = () => {
+                originalImage = img;
+                currentImage = img;
+                drawToCanvas(img);
+                
+                // Switch out of simple preview, show advanced UI
+                editorUi.classList.remove('hidden');
+                canvas.classList.remove('hidden');
+                
+                // Let the main "Add Item" button know we have an edited image
+                window.resolvedImageUrl = dataUrl;
+            };
+            img.src = dataUrl;
+        }
+
+        // Handle File Input from Browse
+        document.getElementById('item-image').addEventListener('change', (e) => {
+            const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                window.resolvedImageUrl = e.target.result; // base64
-                window.showPreview(window.resolvedImageUrl);
-            };
+            reader.onload = (ev) => loadToCanvas(ev.target.result);
             reader.readAsDataURL(file);
         });
 
-        document.getElementById('item-image-url').addEventListener('input', function() {
-            window.resolvedImageUrl = this.value;
-            if (window.resolvedImageUrl) window.showPreview(window.resolvedImageUrl);
-        });
-
-        // Fetch from Cloud
-        document.getElementById('cloud-btn').addEventListener('click', async () => {
-            const code = document.getElementById('cloud-code').value.trim();
-            const res = document.getElementById('cloud-result');
-            if(!code) { res.textContent = "Please enter a code!"; res.className = "text-xs mt-1 text-red-500"; return; }
-            
-            res.textContent = "Fetching...";
-            res.className = "text-xs mt-1 text-gray-500";
-            
-            try {
-                // Try .jpg first, then .png
-                let url;
-                try {
-                    url = await getDownloadURL(ref(storage, `product_images/${code}.jpg`));
-                } catch(e) {
-                    url = await getDownloadURL(ref(storage, `product_images/${code}.png`));
-                }
-                
-                window.resolvedImageUrl = url;
-                window.showPreview(url);
-                res.textContent = "✅ Image loaded from Cloud!";
-                res.className = "text-xs mt-1 text-green-600";
-            } catch (err) {
-                res.textContent = "❌ Image not found in Cloud Storage.";
-                res.className = "text-xs mt-1 text-red-500";
-            }
-        });
-
+        // Update showPreview to also pipe into canvas if URL/Search is used
         window.showPreview = function(url) {
-            const preview = document.getElementById('img-preview');
-            const img = document.getElementById('preview-img');
-            img.src = url;
-            preview.classList.add('show');
+            loadToCanvas(url); // Also push to canvas so they can edit cloud/searched images!
+        };
+
+        function drawToCanvas(imgElement) {
+            const maxWidth = canvasContainer.clientWidth - 40 || 400;
+            const maxHeight = canvasContainer.clientHeight - 40 || 300;
+            
+            let w = imgElement.width;
+            let h = imgElement.height;
+            if (w > 1500 || h > 1500) { const r = Math.min(1500/w, 1500/h); w*=r; h*=r; }
+
+            canvas.width = w; canvas.height = h;
+            const cssRatio = Math.min(maxWidth/w, maxHeight/h);
+            canvas.style.width = (w * cssRatio) + 'px';
+            canvas.style.height = (h * cssRatio) + 'px';
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+            window.resolvedImageUrl = canvas.toDataURL('image/jpeg', 0.85); // Auto-update final save URL
         }
 
-        window.searchProduct = async function() {
-            const code = document.getElementById('item-barcode').value.trim();
-            const resultEl = document.getElementById('search-result');
-            const btn = document.getElementById('search-btn');
-            
-            if (!code) { alert('Please enter a barcode or product code.'); return; }
-            
-            btn.textContent = 'Searching...';
-            btn.disabled = true;
-            resultEl.classList.remove('hidden');
-            resultEl.textContent = 'Searching product database...';
-            resultEl.className = 'mt-2 text-xs text-gray-500';
+        function saveCurrentCanvasState() {
+            const dataUrl = canvas.toDataURL('image/png');
+            const img = new Image();
+            img.onload = () => { 
+                currentImage = img; 
+                window.resolvedImageUrl = canvas.toDataURL('image/jpeg', 0.85);
+            };
+            img.src = dataUrl;
+        }
 
+        // Camera Logic
+        const camModal = document.getElementById('camera-modal');
+        const video = document.getElementById('webcam-video');
+        document.getElementById('start-cam-btn')?.addEventListener('click', async () => {
+            camModal.classList.remove('hidden'); camModal.classList.add('flex');
             try {
-                // Try Open Beauty Facts first (cosmetics)
-                const res = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`);
-                const data = await res.json();
-                
-                if (data.status === 1 && data.product) {
-                    const product = data.product;
-                    const imgUrl = product.image_url || product.image_front_url || '';
-                    
-                    if (imgUrl) {
-                        window.resolvedImageUrl = imgUrl;
-                        showPreview(imgUrl);
-
-                        // Auto-fill name if empty
-                        if (!document.getElementById('item-name').value && product.product_name) {
-                            document.getElementById('item-name').value = product.product_name;
-                        }
-                        
-                        resultEl.textContent = `✅ Found: ${product.product_name || 'Unknown product'}`;
-                        resultEl.className = 'mt-2 text-xs text-green-600';
-                    } else {
-                        resultEl.textContent = '⚠️ Product found but no image available.';
-                        resultEl.className = 'mt-2 text-xs text-yellow-600';
-                    }
-                } else {
-                    // Fallback: Open Food Facts
-                    const res2 = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
-                    const data2 = await res2.json();
-                    
-                    if (data2.status === 1 && data2.product && data2.product.image_url) {
-                        window.resolvedImageUrl = data2.product.image_url;
-                        showPreview(window.resolvedImageUrl);
-                        if (!document.getElementById('item-name').value && data2.product.product_name) {
-                            document.getElementById('item-name').value = data2.product.product_name;
-                        }
-                        resultEl.textContent = `✅ Found: ${data2.product.product_name || 'Product'}`;
-                        resultEl.className = 'mt-2 text-xs text-green-600';
-                    } else {
-                        resultEl.textContent = '❌ Product not found. Try URL tab to paste image link manually.';
-                        resultEl.className = 'mt-2 text-xs text-red-500';
-                    }
-                }
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = stream;
+                video.onloadedmetadata = () => { video.play(); video.classList.remove('hidden'); document.getElementById('cam-loading').classList.add('hidden'); };
             } catch (err) {
-                resultEl.textContent = '❌ Search failed. Check your internet connection.';
-                resultEl.className = 'mt-2 text-xs text-red-500';
-            } finally {
-                btn.textContent = 'Search';
-                btn.disabled = false;
+                alert('Camera access denied or unavailable.'); closeCamera();
             }
+        });
+
+        function closeCamera() {
+            camModal.classList.add('hidden'); camModal.classList.remove('flex');
+            if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
         }
+        document.getElementById('close-cam-btn')?.addEventListener('click', closeCamera);
+        document.getElementById('capture-btn')?.addEventListener('click', () => {
+            if (!video.videoWidth) return;
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = video.videoWidth; tempCanvas.height = video.videoHeight;
+            tempCanvas.getContext('2d').drawImage(video, 0, 0);
+            loadToCanvas(tempCanvas.toDataURL('image/jpeg', 0.9));
+            closeCamera();
+        });
+
+        // Tools: Logo & Text
+        document.getElementById('add-logo-btn')?.addEventListener('click', () => {
+            if (!currentImage) return;
+            ctx.font = "bold 40px 'Inter', sans-serif";
+            const text = "Royal Pallette";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+            ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 4;
+            ctx.fillText(text, canvas.width - 20, canvas.height - 20);
+            ctx.font = "30px Arial";
+            ctx.fillText("👑", canvas.width - ctx.measureText(text).width - 30, canvas.height - 23);
+            saveCurrentCanvasState();
+        });
+
+        const textOpts = document.getElementById('text-tool-options');
+        document.getElementById('add-text-btn')?.addEventListener('click', () => textOpts.classList.remove('hidden'));
+        document.getElementById('cancel-text-btn')?.addEventListener('click', () => textOpts.classList.add('hidden'));
+        document.getElementById('apply-text-btn')?.addEventListener('click', () => {
+            if (!currentImage) return;
+            const text = document.getElementById('overlay-text').value.trim();
+            if (!text) return;
+            ctx.font = `bold ${document.getElementById('overlay-size').value} Inter, sans-serif`;
+            ctx.fillStyle = document.getElementById('overlay-color').value;
+            ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+            ctx.shadowColor="black"; ctx.shadowBlur=7; ctx.lineWidth = 5;
+            const x = canvas.width / 2, y = canvas.height - 20;
+            ctx.strokeStyle = "rgba(0,0,0,0.5)";
+            ctx.strokeText(text, x, y); ctx.fillText(text, x, y);
+            saveCurrentCanvasState();
+            textOpts.classList.add('hidden');
+            document.getElementById('overlay-text').value = '';
+        });
+
+        document.getElementById('reset-canvas-btn')?.addEventListener('click', () => {
+            if (originalImage) { currentImage = originalImage; drawToCanvas(originalImage); }
+        });
+
+        // Basic Crop logic (simplified for inline)
+        const cropOverlay = document.getElementById('crop-overlay');
+        const cropBox = document.getElementById('crop-box');
+        document.getElementById('crop-btn')?.addEventListener('click', () => {
+            if (!currentImage) return;
+            isCropping = true; cropOverlay.classList.remove('hidden');
+        });
+        document.getElementById('cancel-crop-btn')?.addEventListener('click', () => {
+            isCropping = false; cropOverlay.classList.add('hidden');
+        });
+        document.getElementById('apply-crop-btn')?.addEventListener('click', () => {
+            if (!isCropping) return;
+            const rect = canvas.getBoundingClientRect(); const boxRect = cropBox.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
+            const cropX = (boxRect.left - rect.left) * scaleX, cropY = (boxRect.top - rect.top) * scaleY;
+            const cropW = boxRect.width * scaleX, cropH = boxRect.height * scaleY;
+            
+            const tCanvas = document.createElement('canvas');
+            tCanvas.width = cropW; tCanvas.height = cropH;
+            tCanvas.getContext('2d').drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+            loadToCanvas(tCanvas.toDataURL('image/png'));
+            isCropping = false; cropOverlay.classList.add('hidden');
+        });
+        
+        let isDraggingBox = false, dragStartX, dragStartY, boxStartLeft, boxStartTop;
+        cropBox?.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('handle')) return;
+            isDraggingBox = true; dragStartX = e.clientX; dragStartY = e.clientY;
+            boxStartLeft = parseFloat(cropBox.style.left) || 10; boxStartTop = parseFloat(cropBox.style.top) || 10;
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (!isDraggingBox) return;
+            const cRect = canvasContainer.getBoundingClientRect();
+            const dx = ((e.clientX - dragStartX) / cRect.width) * 100, dy = ((e.clientY - dragStartY) / cRect.height) * 100;
+            cropBox.style.left = `${Math.min(Math.max(0, boxStartLeft + dx), 100 - parseFloat(cropBox.style.width||80))}%`;
+            cropBox.style.top = `${Math.min(Math.max(0, boxStartTop + dy), 100 - parseFloat(cropBox.style.height||80))}%`;
+        });
+        document.addEventListener('mouseup', () => isDraggingBox = false);
+
     </script>
 
     <script type="module" src="../js/admin_items.js"></script>
 </body>
 </html>
+
