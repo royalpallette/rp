@@ -229,7 +229,7 @@
 
             <div class="mt-6 flex gap-3">
                 <button type="button" onclick="closePaymentModal()" class="flex-1 px-4 py-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition">Cancel</button>
-                <button type="button" id="confirm-payment-btn" class="flex-1 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-bold transition shadow-md">Complete & Print</button>
+                <button type="button" id="confirm-payment-btn" onclick="doConfirmPayment()" class="flex-1 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-bold transition shadow-md">Complete & Print</button>
             </div>
         </div>
     </div>
@@ -445,6 +445,79 @@
 
         // Load customers on page load
         loadCustomersDropdown();
+
+        // ===== PAYMENT MODAL FUNCTIONS =====
+        window.openPaymentModal = function() {
+            const posTotal = document.getElementById('pos-total');
+            document.getElementById('payment-modal-total').textContent = posTotal.textContent;
+            document.getElementById('pay-amount-given').value = '';
+            document.getElementById('pay-change-due').textContent = 'Rs. 0.00';
+            document.querySelector('input[name="pay-method"][value="Cash"]').checked = true;
+            document.getElementById('cash-payment-fields').style.display = 'block';
+
+            const modal = document.getElementById('payment-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closePaymentModal = function() {
+            const modal = document.getElementById('payment-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.toggleCashFields = function() {
+            const checked = document.querySelector('input[name="pay-method"]:checked');
+            if (!checked) return;
+            const cashFields = document.getElementById('cash-payment-fields');
+            cashFields.style.display = (checked.value === 'Cash') ? 'block' : 'none';
+        };
+
+        window.calculateChange = function() {
+            const total = parseFloat(document.getElementById('pos-total').textContent.replace('Rs. ', '')) || 0;
+            const given = parseFloat(document.getElementById('pay-amount-given').value) || 0;
+            const change = given - total;
+            const el = document.getElementById('pay-change-due');
+            if (change >= 0) {
+                el.textContent = `Rs. ${change.toFixed(2)}`;
+                el.className = "text-xl font-bold text-green-600";
+            } else {
+                el.textContent = `Need Rs. ${Math.abs(change).toFixed(2)} more`;
+                el.className = "text-xl font-bold text-red-600";
+            }
+        };
+
+        window.doConfirmPayment = async function() {
+            const methodEl = document.querySelector('input[name="pay-method"]:checked');
+            if (!methodEl) return alert('Select a payment method!');
+            const method = methodEl.value;
+            const totalAmount = parseFloat(document.getElementById('pos-total').textContent.replace('Rs. ', '')) || 0;
+
+            let amountGiven = totalAmount;
+            let changeDue = 0;
+
+            if (method === 'Cash') {
+                amountGiven = parseFloat(document.getElementById('pay-amount-given').value) || 0;
+                if (amountGiven < totalAmount) return alert('Insufficient cash! Please enter the correct amount.');
+                changeDue = amountGiven - totalAmount;
+            }
+
+            const btn = document.getElementById('confirm-payment-btn');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+
+            try {
+                // Call the function exposed by pos.js module
+                if (typeof window.processPayment === 'function') {
+                    await window.processPayment(method, amountGiven, changeDue);
+                } else {
+                    alert('Error: POS module not ready. Please refresh the page.');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Complete & Print';
+            }
+        };
     </script>
 
     <script type="module" src="../js/pos.js"></script>

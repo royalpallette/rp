@@ -252,80 +252,23 @@ document.getElementById('save-cust-btn').addEventListener('click', async () => {
     }
 });
 
-// Checkout Process
+// Checkout Process — open payment modal
 document.getElementById('checkout-btn').addEventListener('click', () => {
     if (cart.length === 0) return alert('Cart is empty!');
     const customer = posCustomer.value;
     if (!customer) return alert('Please select a customer!');
-    
-    // Open Payment Modal
-    const totalStr = posTotal.textContent.replace('Rs. ', '');
-    document.getElementById('payment-modal-total').textContent = posTotal.textContent;
-    document.getElementById('pay-amount-given').value = '';
-    document.getElementById('pay-change-due').textContent = 'Rs. 0.00';
-    
-    document.querySelector('input[name="pay-method"][value="Cash"]').checked = true;
-    window.toggleCashFields();
-
-    const modal = document.getElementById('payment-modal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    // Open the payment modal (defined in inline script)
+    window.openPaymentModal();
 });
 
-window.closePaymentModal = function() {
-    const modal = document.getElementById('payment-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-};
-
-window.toggleCashFields = function() {
-    const method = document.querySelector('input[name="pay-method"]:checked').value;
-    const cashFields = document.getElementById('cash-payment-fields');
-    if (method === 'Cash') {
-        cashFields.style.display = 'block';
-    } else {
-        cashFields.style.display = 'none';
-    }
-};
-
-window.calculateChange = function() {
-    const total = parseFloat(posTotal.textContent.replace('Rs. ', '')) || 0;
-    const given = parseFloat(document.getElementById('pay-amount-given').value) || 0;
-    const change = given - total;
-    const changeEl = document.getElementById('pay-change-due');
-    if (change >= 0) {
-        changeEl.textContent = `Rs. ${change.toFixed(2)}`;
-        changeEl.className = "text-xl font-bold text-green-600";
-    } else {
-        changeEl.textContent = `Need Rs. ${Math.abs(change).toFixed(2)} more`;
-        changeEl.className = "text-xl font-bold text-red-600";
-    }
-};
-
-document.getElementById('confirm-payment-btn').addEventListener('click', async () => {
+// Exposed to pos.html inline script's doConfirmPayment()
+window.processPayment = async function(method, amountGiven, changeDue) {
     const customer = posCustomer.value;
-    const method = document.querySelector('input[name="pay-method"]:checked').value;
-    
     const subtotalStr = posSubtotal.textContent.replace('Rs. ', '');
     const totalStr = posTotal.textContent.replace('Rs. ', '');
     const discountAmount = parseFloat(posDiscount.value) || 0;
     const deliveryAmount = parseFloat(posDelivery.value) || 0;
     const totalAmount = parseFloat(totalStr);
-
-    let amountGiven = totalAmount;
-    let changeDue = 0;
-
-    if (method === 'Cash') {
-        amountGiven = parseFloat(document.getElementById('pay-amount-given').value) || 0;
-        if (amountGiven < totalAmount) {
-            return alert('Insufficient cash provided!');
-        }
-        changeDue = amountGiven - totalAmount;
-    }
-
-    const btn = document.getElementById('confirm-payment-btn');
-    btn.disabled = true;
-    btn.innerHTML = 'Processing...';
 
     try {
         // 1. Generate Incremental Order ID
@@ -361,13 +304,13 @@ document.getElementById('confirm-payment-btn').addEventListener('click', async (
         };
 
         await push(ordersRef, orderData);
-        
+
         // 3. Print Receipt
         printReceipt(orderData);
-        
+
         // 4. Reset POS
-        alert('Payment successful & Order saved!');
-        closePaymentModal();
+        alert('✅ Payment successful & Order saved!');
+        window.closePaymentModal();
         cart = [];
         posDiscount.value = "0";
         posDelivery.value = "0";
@@ -375,12 +318,10 @@ document.getElementById('confirm-payment-btn').addEventListener('click', async (
         renderCart();
     } catch (error) {
         console.error("Error creating order:", error);
-        alert('Error processing order.');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = 'Complete & Print';
+        alert('Error processing order: ' + error.message);
+        throw error; // re-throw so doConfirmPayment can handle finally
     }
-});
+};
 
 function printReceipt(orderData) {
     document.getElementById('receipt-shop-name').textContent = receiptSettings.shopName;
