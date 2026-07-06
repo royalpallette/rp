@@ -234,44 +234,112 @@
         </div>
     </div>
 
-    <!-- Receipt Print Template (Hidden) -->
+    <!-- A5 Invoice Print Template (Hidden) -->
     <div id="print-receipt" class="hidden">
-        <div style="width: 300px; padding: 20px; font-family: 'Courier New', Courier, monospace; color: #000; background: #fff;">
-            <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
-                <h2 id="receipt-shop-name" style="margin: 0; font-size: 20px;">Royal Pallette</h2>
-                <p id="receipt-shop-address" style="margin: 5px 0 0; font-size: 12px;">Shop Address Here</p>
-                <p id="receipt-shop-phone" style="margin: 5px 0 0; font-size: 12px;">Tel: 000-0000000</p>
+        <div id="invoice-body" style="
+            width: 148mm;
+            min-height: 210mm;
+            padding: 12mm 14mm;
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            font-size: 11pt;
+            color: #1a1a1a;
+            background: #ffffff;
+            box-sizing: border-box;
+        ">
+            <!-- ===== HEADER ===== -->
+            <div style="text-align:center; border-bottom: 2.5px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 10px;">
+                <!-- Crown SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32" style="width:52px;height:26px;display:block;margin:0 auto 4px;">
+                    <polygon points="0,32 10,0 22,20 32,2 42,20 54,0 64,32" style="fill:#b8960c;"/>
+                    <circle cx="10" cy="0" r="3" style="fill:#b8960c;"/>
+                    <circle cx="32" cy="2" r="3" style="fill:#b8960c;"/>
+                    <circle cx="54" cy="0" r="3" style="fill:#b8960c;"/>
+                </svg>
+                <!-- Brand Name -->
+                <div style="font-family:'Times New Roman',Times,serif; font-size:22pt; font-weight:bold; font-style:italic; letter-spacing:1px; color:#1a1a1a; line-height:1.1;">Royal Pallette</div>
+                <div style="font-family:Tahoma,Arial,sans-serif; font-size:7.5pt; letter-spacing:3px; text-transform:uppercase; color:#555; margin-top:2px;">Premium Beauty &amp; Cosmetics</div>
+                <div style="font-family:Arial,Helvetica,sans-serif; font-size:8.5pt; color:#333; margin-top:6px;">
+                    <span id="receipt-shop-address">123 Beauty Lane, Colombo</span>
+                    &nbsp;&bull;&nbsp;
+                    <span id="receipt-shop-phone">Tel: 011-2345678</span>
+                </div>
             </div>
-            <div style="font-size: 12px; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 10px;">
-                <p style="margin: 2px 0;">Order No: <b id="receipt-order-no">#0000</b></p>
-                <p style="margin: 2px 0;">Date: <span id="receipt-date"></span></p>
-                <p style="margin: 2px 0;">Customer: <span id="receipt-customer"></span></p>
+
+            <!-- ===== INVOICE TITLE ===== -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                <div>
+                    <div style="font-family:'Times New Roman',Times,serif; font-size:15pt; font-weight:bold; letter-spacing:0.5px;">INVOICE</div>
+                    <div style="font-family:Arial,sans-serif; font-size:8pt; color:#555; margin-top:2px;">Point of Sale Receipt</div>
+                </div>
+                <div style="text-align:right; font-family:Arial,sans-serif; font-size:8.5pt; color:#333; line-height:1.8;">
+                    <div><b style="font-family:'Times New Roman',serif;">Invoice No:</b> <span id="receipt-order-no" style="font-weight:bold; color:#000;">#0000</span></div>
+                    <div><b style="font-family:'Times New Roman',serif;">Date:</b> <span id="receipt-date"></span></div>
+                    <div><b style="font-family:'Times New Roman',serif;">Payment:</b> <span id="receipt-method" style="font-weight:bold;"></span></div>
+                </div>
             </div>
-            <table style="width: 100%; font-size: 12px; border-collapse: collapse; margin-bottom: 10px;">
+
+            <!-- ===== BILLED TO ===== -->
+            <div style="background:#f7f7f7; border-left:3px solid #b8960c; padding:7px 10px; margin-bottom:12px; font-family:Arial,sans-serif; font-size:8.5pt;">
+                <div style="font-family:'Times New Roman',serif; font-weight:bold; font-size:9pt; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px;">Billed To</div>
+                <div id="receipt-customer" style="font-weight:600; font-size:10pt; color:#111;"></div>
+            </div>
+
+            <!-- ===== ITEMS TABLE ===== -->
+            <table style="width:100%; border-collapse:collapse; font-family:Arial,Helvetica,sans-serif; font-size:8.5pt; margin-bottom:10px;">
                 <thead>
-                    <tr style="border-bottom: 1px dashed #000;">
-                        <th style="text-align: left; padding: 4px 0;">Item</th>
-                        <th style="text-align: center; padding: 4px 0;">Qty</th>
-                        <th style="text-align: right; padding: 4px 0;">Amount</th>
+                    <tr style="background:#1a1a1a; color:#fff;">
+                        <th style="text-align:left; padding:6px 8px; font-weight:600; letter-spacing:0.3px;">#</th>
+                        <th style="text-align:left; padding:6px 8px; font-weight:600;">Item Description</th>
+                        <th style="text-align:center; padding:6px 8px; font-weight:600;">Qty</th>
+                        <th style="text-align:right; padding:6px 8px; font-weight:600;">Unit Price</th>
+                        <th style="text-align:right; padding:6px 8px; font-weight:600;">Amount</th>
                     </tr>
                 </thead>
                 <tbody id="receipt-items"></tbody>
             </table>
-            <div style="border-top: 1px dashed #000; padding-top: 10px; font-size: 14px; text-align: right;">
-                <p style="margin: 2px 0; font-size: 12px;">Subtotal: <span id="receipt-subtotal"></span></p>
-                <p style="margin: 2px 0; font-size: 12px;">Discount: <span id="receipt-discount"></span></p>
-                <p style="margin: 2px 0; font-size: 12px;" id="receipt-delivery-row">Delivery: <span id="receipt-delivery"></span></p>
-                <h3 style="margin: 10px 0 0; font-size: 16px;">Total: <span id="receipt-total"></span></h3>
-                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #000;">
-                    <p style="margin: 2px 0; font-size: 12px;">Paid via <span id="receipt-method" style="font-weight:bold;"></span>: <span id="receipt-paid"></span></p>
-                    <p style="margin: 2px 0; font-size: 12px;" id="receipt-change-row">Change: <span id="receipt-change"></span></p>
+
+            <!-- ===== TOTALS ===== -->
+            <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                <table style="font-family:Arial,sans-serif; font-size:8.5pt; border-collapse:collapse; min-width:52%;">
+                    <tr>
+                        <td style="padding:3px 8px; color:#555;">Subtotal</td>
+                        <td style="padding:3px 8px; text-align:right; font-weight:600;" id="receipt-subtotal"></td>
+                    </tr>
+                    <tr id="receipt-delivery-row">
+                        <td style="padding:3px 8px; color:#555;">Delivery</td>
+                        <td style="padding:3px 8px; text-align:right; font-weight:600;" id="receipt-delivery"></td>
+                    </tr>
+                    <tr>
+                        <td style="padding:3px 8px; color:#555;">Discount</td>
+                        <td style="padding:3px 8px; text-align:right; font-weight:600;" id="receipt-discount"></td>
+                    </tr>
+                    <tr style="border-top:2px solid #1a1a1a;">
+                        <td style="padding:6px 8px; font-family:'Times New Roman',serif; font-size:11pt; font-weight:bold;">TOTAL</td>
+                        <td style="padding:6px 8px; text-align:right; font-family:'Times New Roman',serif; font-size:12pt; font-weight:bold; color:#1a1a1a;" id="receipt-total"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ===== PAYMENT DETAILS ===== -->
+            <div style="background:#f7f7f7; border:1px solid #ddd; border-radius:4px; padding:7px 10px; font-family:Arial,sans-serif; font-size:8.5pt; margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#555;">Amount Paid</span>
+                    <span style="font-weight:bold;" id="receipt-paid"></span>
+                </div>
+                <div id="receipt-change-row" style="display:flex; justify-content:space-between; margin-top:3px;">
+                    <span style="color:#555;">Change Returned</span>
+                    <span style="font-weight:bold; color:#166534;" id="receipt-change"></span>
                 </div>
             </div>
-            <div style="text-align: center; margin-top: 20px; font-size: 12px;">
-                <p id="receipt-footer-msg" style="margin: 0; font-style: italic;">Thank you for shopping with us!</p>
+
+            <!-- ===== FOOTER ===== -->
+            <div style="border-top:1px solid #ccc; padding-top:10px; text-align:center;">
+                <div id="receipt-footer-msg" style="font-family:'Times New Roman',Times,serif; font-size:10pt; font-style:italic; color:#444; margin-bottom:4px;">Thank you for shopping with us!</div>
+                <div style="font-family:Arial,sans-serif; font-size:7pt; color:#999; letter-spacing:1px; text-transform:uppercase;">Royal Pallette &mdash; All Rights Reserved</div>
             </div>
         </div>
     </div>
+
 
     <script>
         const POS_FB_URL = 'https://royal-pallette-default-rtdb.asia-southeast1.firebasedatabase.app';
@@ -520,6 +588,6 @@
         };
     </script>
 
-    <script type="module" src="../js/pos.js"></script>
+    <script src="../js/pos.js"></script>
 </body>
 </html>
