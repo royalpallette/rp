@@ -43,15 +43,21 @@ async function loadReceiptSettings() {
 }
 
 // ===== LOAD CUSTOMERS INTO DROPDOWN =====
+let registeredPhones = [];
+
 async function loadCustomers() {
     const current = posCustomer.value;
     posCustomer.innerHTML = '<option value="">Select Customer...</option><option value="Walk-in Customer">Walk-in Customer</option>';
+    registeredPhones = [];
     try {
         const res  = await fetch(`${FB_URL}/users.json`);
         const data = await res.json();
         if (data) {
             Object.values(data).forEach(user => {
                 if (user.role === 'customer' || user.role === 'Customer') {
+                    if (user.phone) {
+                        registeredPhones.push(user.phone.replace(/[\s\-]/g, ''));
+                    }
                     const opt = document.createElement('option');
                     opt.value       = user.username + (user.phone ? ` (${user.phone})` : '');
                     opt.textContent = user.username + (user.email ? ' - ' + user.email : '');
@@ -506,7 +512,9 @@ window.processPayment = async function(method, amountGiven, changeDue) {
             const phoneMatch = custVal.match(/\((\d[\d\-\s]+)\)/);
             const phone = phoneMatch ? phoneMatch[1].replace(/[\s\-]/g, '') : null;
             const nameOnly = custVal.replace(/\s*\(.*\)/, '').trim();
-            if (phone && phone.length >= 9) {
+            
+            // Only add points if the phone matches a registered customer
+            if (phone && phone.length >= 9 && registeredPhones.includes(phone)) {
                 const ptsToAdd = Math.floor(total / 100);
                 if (ptsToAdd > 0) {
                     const lpRes  = await fetch(`${FB_URL}/loyalty_points/${phone}.json`);
@@ -523,6 +531,8 @@ window.processPayment = async function(method, amountGiven, changeDue) {
                     });
                     console.log(`✅ +${ptsToAdd} points for ${nameOnly} (${phone}). Total: ${newPts}`);
                 }
+            } else if (phone && !registeredPhones.includes(phone)) {
+                console.log(`ℹ️ Customer ${nameOnly} is not registered. Points skipped.`);
             }
         } catch(e) { console.warn('Could not update loyalty points', e); }
 
