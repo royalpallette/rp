@@ -45,7 +45,7 @@ async function loadReceiptSettings() {
 // ===== LOAD CUSTOMERS INTO DROPDOWN =====
 let registeredPhones = [];
 
-async function loadCustomers() {
+window.loadCustomers = async function() {
     const current = posCustomer.value;
     posCustomer.innerHTML = '<option value="">Select Customer...</option><option value="Walk-in Customer">Walk-in Customer</option>';
     registeredPhones = [];
@@ -67,7 +67,61 @@ async function loadCustomers() {
         }
         if (current) posCustomer.value = current;
     } catch(e) { console.warn('Could not load customers', e); }
-}
+};
+
+// ===== SAVE NEW CUSTOMER =====
+window.saveNewCustomer = async function() {
+    const btn = document.getElementById('save-cust-btn');
+    const name = document.getElementById('new-cust-name').value.trim();
+    const phone = document.getElementById('new-cust-phone').value.trim();
+    const email = document.getElementById('new-cust-email').value.trim();
+    
+    if (!name) return alert('Name is required!');
+    if (!phone) return alert('Phone number is required!');
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+        const newUserId = 'user_' + Date.now();
+        const userData = {
+            id: newUserId,
+            username: name,
+            phone: phone,
+            email: email,
+            address: document.getElementById('new-cust-address').value.trim(),
+            role: 'customer',
+            createdAt: new Date().toISOString()
+        };
+
+        const res = await fetch(`${FB_URL}/users/${newUserId}.json`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+        });
+
+        if (!res.ok) throw new Error('Failed to save customer');
+
+        alert('Customer added successfully!');
+        window.closeAddCustModal();
+        
+        // Reset form
+        document.getElementById('new-cust-name').value = '';
+        document.getElementById('new-cust-phone').value = '';
+        document.getElementById('new-cust-email').value = '';
+        document.getElementById('new-cust-address').value = '';
+
+        // Reload customers and select the new one
+        await window.loadCustomers();
+        posCustomer.value = name + ` (${phone})`;
+
+    } catch (error) {
+        alert('Error: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Customer';
+    }
+};
 
 // ===== LOAD PRODUCT IMAGES CACHE =====
 async function loadProductImages() {
