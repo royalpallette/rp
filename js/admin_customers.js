@@ -1,5 +1,6 @@
 import { db } from './firebase-config.js';
 import { ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { setupLocationDropdowns } from './sl_locations.js';
 
 const customersList = document.getElementById('customers-list');
 const searchInput = document.getElementById('search-customer');
@@ -9,19 +10,47 @@ let allOrders = [];
 let allLoyalty = {};
 
 // ===== MODAL CONTROLS =====
-window.openAddCustModal = () => document.getElementById('add-customer-modal').classList.remove('hidden');
-window.closeAddCustModal = () => document.getElementById('add-customer-modal').classList.add('hidden');
-window.closeCustomerModal = () => document.getElementById('customer-modal').classList.add('hidden');
+window.openAddCustModal = () => {
+    const modal = document.getElementById('add-customer-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setupLocationDropdowns('new-cust-province', 'new-cust-district', 'new-cust-town', 'new-cust-zip');
+};
+window.closeAddCustModal = () => {
+    const modal = document.getElementById('add-customer-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
+window.closeCustomerModal = () => {
+    const modal = document.getElementById('customer-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
 
 // ===== SAVE CUSTOMER =====
 window.saveNewCustomer = async () => {
     const btn = document.getElementById('save-cust-btn');
     const name = document.getElementById('new-cust-name').value.trim();
-    const phone = document.getElementById('new-cust-phone').value.trim();
-    const email = document.getElementById('new-cust-email').value.trim();
-    const address = document.getElementById('new-cust-address').value.trim();
     
-    if (!name || !phone) return alert('Name and Phone are required!');
+    const phone = document.getElementById('new-cust-phone').value.trim();
+    const phone2 = document.getElementById('new-cust-phone2') ? document.getElementById('new-cust-phone2').value.trim() : '';
+    const phone3 = document.getElementById('new-cust-phone3') ? document.getElementById('new-cust-phone3').value.trim() : '';
+    
+    const email = document.getElementById('new-cust-email').value.trim();
+    const email2 = document.getElementById('new-cust-email2') ? document.getElementById('new-cust-email2').value.trim() : '';
+    const email3 = document.getElementById('new-cust-email3') ? document.getElementById('new-cust-email3').value.trim() : '';
+    
+    const province = document.getElementById('new-cust-province') ? document.getElementById('new-cust-province').value : '';
+    const district = document.getElementById('new-cust-district') ? document.getElementById('new-cust-district').value : '';
+    const town = document.getElementById('new-cust-town') ? document.getElementById('new-cust-town').value : '';
+    const zip = document.getElementById('new-cust-zip') ? document.getElementById('new-cust-zip').value.trim() : '';
+
+    const address = document.getElementById('new-cust-address').value.trim();
+    const address2 = document.getElementById('new-cust-address2') ? document.getElementById('new-cust-address2').value.trim() : '';
+    const address3 = document.getElementById('new-cust-address3') ? document.getElementById('new-cust-address3').value.trim() : '';
+    
+    if (!name || !phone) return alert('Name and Phone 1 are required!');
+    if (!province || !district || !town) return alert('Province, District, and Town are required!');
 
     btn.disabled = true;
     btn.textContent = 'Saving...';
@@ -32,18 +61,38 @@ window.saveNewCustomer = async () => {
             id: newId,
             username: name,
             phone: phone,
+            phone2: phone2,
+            phone3: phone3,
             email: email,
+            email2: email2,
+            email3: email3,
+            province: province,
+            district: district,
+            town: town,
+            postalCode: zip,
             address: address,
+            address2: address2,
+            address3: address3,
             role: 'customer',
             createdAt: new Date().toISOString()
         });
         
         alert('Customer added!');
-        closeAddCustModal();
+        window.closeAddCustModal();
         document.getElementById('new-cust-name').value = '';
         document.getElementById('new-cust-phone').value = '';
+        if(document.getElementById('new-cust-phone2')) document.getElementById('new-cust-phone2').value = '';
+        if(document.getElementById('new-cust-phone3')) document.getElementById('new-cust-phone3').value = '';
         document.getElementById('new-cust-email').value = '';
+        if(document.getElementById('new-cust-email2')) document.getElementById('new-cust-email2').value = '';
+        if(document.getElementById('new-cust-email3')) document.getElementById('new-cust-email3').value = '';
+        if(document.getElementById('new-cust-province')) document.getElementById('new-cust-province').value = '';
+        if(document.getElementById('new-cust-district')) document.getElementById('new-cust-district').value = '';
+        if(document.getElementById('new-cust-town')) document.getElementById('new-cust-town').value = '';
+        if(document.getElementById('new-cust-zip')) document.getElementById('new-cust-zip').value = '';
         document.getElementById('new-cust-address').value = '';
+        if(document.getElementById('new-cust-address2')) document.getElementById('new-cust-address2').value = '';
+        if(document.getElementById('new-cust-address3')) document.getElementById('new-cust-address3').value = '';
     } catch (e) {
         alert('Failed to save: ' + e.message);
     } finally {
@@ -129,7 +178,9 @@ searchInput.addEventListener('input', renderCustomers);
 
 // ===== CUSTOMER 360 VIEW =====
 window.openCustomer360 = (customer) => {
-    document.getElementById('customer-modal').classList.remove('hidden');
+    const cModal = document.getElementById('customer-modal');
+    cModal.classList.remove('hidden');
+    cModal.classList.add('flex');
     
     document.getElementById('modal-cust-name').textContent = customer.username;
     document.getElementById('modal-cust-phone').textContent = customer.phone || 'No phone provided';

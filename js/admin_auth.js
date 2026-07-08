@@ -20,9 +20,13 @@ if (adminLoginForm) {
             if (user === ADMIN_USER && pass === ADMIN_PASS) {
                 sessionStorage.setItem('admin_logged_in', 'true');
                 btn.innerHTML = '✅ Access Granted!';
-                setTimeout(() => {
-                    window.location.href = 'pos.html';
-                }, 600);
+                
+                // Log activity
+                logAdminActivity("Admin Logged In").then(() => {
+                    setTimeout(() => {
+                        window.location.href = 'pos.html';
+                    }, 400);
+                });
             } else {
                 err.classList.add('show');
                 btn.disabled = false;
@@ -43,7 +47,28 @@ window.checkAdminAuth = function() {
 }
 
 // 3. Admin Logout
-window.adminLogout = function() {
+window.adminLogout = async function() {
+    await logAdminActivity("Admin Logged Out");
     sessionStorage.removeItem('admin_logged_in');
     window.location.replace('login.html');
+}
+
+// 4. Activity Logger Utility
+window.logAdminActivity = async function(action) {
+    const FB_URL = 'https://royal-pallette-default-rtdb.asia-southeast1.firebasedatabase.app';
+    const logId = 'log_' + Date.now();
+    const logData = {
+        action: action,
+        user: "Admin",
+        timestamp: new Date().toISOString()
+    };
+    try {
+        await fetch(`${FB_URL}/admin_logs/${logId}.json`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(logData)
+        });
+    } catch (e) {
+        console.error("Failed to log activity:", e);
+    }
 }

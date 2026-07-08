@@ -139,50 +139,60 @@
     <div id="add-customer-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
             <h3 class="text-lg font-bold text-gray-800 mb-4">Add New Customer</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-4">
+                <!-- Names -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                     <input type="text" id="new-cust-name" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" required>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <input type="email" id="new-cust-email" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                    <input type="text" id="new-cust-phone" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                    <input type="text" id="new-cust-address" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone 2 (Optional)</label>
-                    <input type="text" id="new-cust-phone2" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Customer Photo (Optional)</label>
-                    <input type="file" id="new-cust-photo" accept="image/*" class="w-full border border-gray-300 rounded-lg p-1.5 focus:ring-2 focus:ring-brand focus:outline-none text-sm">
-                </div>
                 
+                <!-- Phones -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                    <input type="text" id="new-cust-country" value="Sri Lanka" readonly class="w-full border border-gray-300 rounded-lg p-2 bg-gray-100 text-gray-500 cursor-not-allowed">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Numbers</label>
+                    <input type="text" id="new-cust-phone" placeholder="Phone 1 (Required) *" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none mb-2">
+                    <input type="text" id="new-cust-phone2" placeholder="Phone 2 (Optional)" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none mb-2">
+                    <input type="text" id="new-cust-phone3" placeholder="Phone 3 (Optional)" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
                 </div>
+
+                <!-- Emails -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
-                    <input type="text" id="new-cust-province" list="province-list" placeholder="Search Province..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" oninput="updateDistricts()">
-                    <datalist id="province-list"></datalist>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Addresses</label>
+                    <input type="email" id="new-cust-email" placeholder="Email 1 (Optional)" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none mb-2">
+                    <input type="email" id="new-cust-email2" placeholder="Email 2 (Optional)" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none mb-2">
+                    <input type="email" id="new-cust-email3" placeholder="Email 3 (Optional)" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">District</label>
-                    <input type="text" id="new-cust-district" list="district-list" placeholder="Search District..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" oninput="updateTowns()" disabled>
-                    <datalist id="district-list"></datalist>
+                <!-- Location Info -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Province *</label>
+                        <select id="new-cust-province" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" required>
+                            <option value="">Select Province</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">District *</label>
+                        <select id="new-cust-district" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" disabled required>
+                            <option value="">Select District</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Town *</label>
+                        <select id="new-cust-town" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" disabled required>
+                            <option value="">Select Town</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
+                        <input type="text" id="new-cust-zip" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none bg-gray-100" readonly required>
+                    </div>
                 </div>
+
+                <!-- Addresses -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Town</label>
-                    <input type="text" id="new-cust-town" list="town-list" placeholder="Search Town..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" disabled>
-                    <datalist id="town-list"></datalist>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Addresses</label>
+                    <textarea id="new-cust-address" rows="1" placeholder="Address 1 (Optional)" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none mb-2"></textarea>
+                    <textarea id="new-cust-address2" rows="1" placeholder="Address 2 (Optional)" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none mb-2"></textarea>
+                    <textarea id="new-cust-address3" rows="1" placeholder="Address 3 (Optional)" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none"></textarea>
                 </div>
             </div>
             <div class="mt-6 flex justify-end gap-3">
@@ -492,7 +502,9 @@
         window.openAddCustModal = function() {
             document.getElementById('add-customer-modal').classList.remove('hidden');
             document.getElementById('add-customer-modal').classList.add('flex');
-            initGeoDropdowns();
+            if (typeof window.setupLocationDropdowns === 'function') {
+                window.setupLocationDropdowns('new-cust-province', 'new-cust-district', 'new-cust-town', 'new-cust-zip');
+            }
             setTimeout(() => document.getElementById('new-cust-name').focus(), 100);
         };
         window.closeAddCustModal = function() {
@@ -635,6 +647,10 @@
         };
     </script>
 
+    <script type="module">
+        import { setupLocationDropdowns } from '../js/sl_locations.js';
+        window.setupLocationDropdowns = setupLocationDropdowns;
+    </script>
     <script src="../js/pos.js"></script>
 </body>
 </html>

@@ -49,15 +49,24 @@ window.loadCustomers = async function() {
     const current = posCustomer.value;
     posCustomer.innerHTML = '<option value="">Select Customer...</option><option value="Walk-in Customer">Walk-in Customer</option>';
     registeredPhones = [];
+    const addedPhones = new Set();
     try {
         const res  = await fetch(`${FB_URL}/users.json`);
         const data = await res.json();
         if (data) {
             Object.values(data).forEach(user => {
                 if (user.role === 'customer' || user.role === 'Customer') {
+                    let phoneRaw = '';
                     if (user.phone) {
-                        registeredPhones.push(user.phone.replace(/[\s\-]/g, ''));
+                        phoneRaw = user.phone.replace(/[\s\-]/g, '');
                     }
+                    if (phoneRaw && addedPhones.has(phoneRaw)) return; // Prevent duplicate entries for the same phone
+                    
+                    if (phoneRaw) {
+                        registeredPhones.push(phoneRaw);
+                        addedPhones.add(phoneRaw);
+                    }
+                    
                     const opt = document.createElement('option');
                     opt.value       = user.username + (user.phone ? ` (${user.phone})` : '');
                     opt.textContent = user.username + (user.email ? ' - ' + user.email : '');
@@ -73,11 +82,27 @@ window.loadCustomers = async function() {
 window.saveNewCustomer = async function() {
     const btn = document.getElementById('save-cust-btn');
     const name = document.getElementById('new-cust-name').value.trim();
+    
     const phone = document.getElementById('new-cust-phone').value.trim();
+    const phone2 = document.getElementById('new-cust-phone2') ? document.getElementById('new-cust-phone2').value.trim() : '';
+    const phone3 = document.getElementById('new-cust-phone3') ? document.getElementById('new-cust-phone3').value.trim() : '';
+    
     const email = document.getElementById('new-cust-email').value.trim();
+    const email2 = document.getElementById('new-cust-email2') ? document.getElementById('new-cust-email2').value.trim() : '';
+    const email3 = document.getElementById('new-cust-email3') ? document.getElementById('new-cust-email3').value.trim() : '';
+    
+    const province = document.getElementById('new-cust-province') ? document.getElementById('new-cust-province').value : '';
+    const district = document.getElementById('new-cust-district') ? document.getElementById('new-cust-district').value : '';
+    const town = document.getElementById('new-cust-town') ? document.getElementById('new-cust-town').value : '';
+    const zip = document.getElementById('new-cust-zip') ? document.getElementById('new-cust-zip').value.trim() : '';
+    
+    const address = document.getElementById('new-cust-address').value.trim();
+    const address2 = document.getElementById('new-cust-address2') ? document.getElementById('new-cust-address2').value.trim() : '';
+    const address3 = document.getElementById('new-cust-address3') ? document.getElementById('new-cust-address3').value.trim() : '';
     
     if (!name) return alert('Name is required!');
-    if (!phone) return alert('Phone number is required!');
+    if (!phone) return alert('Phone number 1 is required!');
+    if (!province || !district || !town) return alert('Province, District, and Town are required!');
 
     btn.disabled = true;
     btn.textContent = 'Saving...';
@@ -88,8 +113,18 @@ window.saveNewCustomer = async function() {
             id: newUserId,
             username: name,
             phone: phone,
+            phone2: phone2,
+            phone3: phone3,
             email: email,
-            address: document.getElementById('new-cust-address').value.trim(),
+            email2: email2,
+            email3: email3,
+            province: province,
+            district: district,
+            town: town,
+            postalCode: zip,
+            address: address,
+            address2: address2,
+            address3: address3,
             role: 'customer',
             createdAt: new Date().toISOString()
         };
@@ -108,8 +143,18 @@ window.saveNewCustomer = async function() {
         // Reset form
         document.getElementById('new-cust-name').value = '';
         document.getElementById('new-cust-phone').value = '';
+        if(document.getElementById('new-cust-phone2')) document.getElementById('new-cust-phone2').value = '';
+        if(document.getElementById('new-cust-phone3')) document.getElementById('new-cust-phone3').value = '';
         document.getElementById('new-cust-email').value = '';
+        if(document.getElementById('new-cust-email2')) document.getElementById('new-cust-email2').value = '';
+        if(document.getElementById('new-cust-email3')) document.getElementById('new-cust-email3').value = '';
+        if(document.getElementById('new-cust-province')) document.getElementById('new-cust-province').value = '';
+        if(document.getElementById('new-cust-district')) { document.getElementById('new-cust-district').value = ''; document.getElementById('new-cust-district').disabled = true; }
+        if(document.getElementById('new-cust-town')) { document.getElementById('new-cust-town').value = ''; document.getElementById('new-cust-town').disabled = true; }
+        if(document.getElementById('new-cust-zip')) document.getElementById('new-cust-zip').value = '';
         document.getElementById('new-cust-address').value = '';
+        if(document.getElementById('new-cust-address2')) document.getElementById('new-cust-address2').value = '';
+        if(document.getElementById('new-cust-address3')) document.getElementById('new-cust-address3').value = '';
 
         // Reload customers and select the new one
         await window.loadCustomers();
