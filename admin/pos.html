@@ -8,6 +8,16 @@
     <script>
         tailwind.config = {
             theme: {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Terminal | Royal Pallette</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
                 extend: { colors: { brand: { DEFAULT: '#fb7185', dark: '#be123c' }, dark: '#171717' } }
             }
         }
@@ -16,37 +26,10 @@
     <style> body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; } </style>
     <script src="../js/admin_auth.js"></script>
     <script> checkAdminAuth(); </script>
+    <script src="../js/admin_sidebar.js"></script>
 <script type="module" src="../js/favicon.js"></script>
 </head>
 <body class="text-gray-800 antialiased flex h-screen overflow-hidden">
-    
-    <!-- Sidebar -->
-    <aside class="w-20 lg:w-64 bg-dark text-white flex flex-col flex-shrink-0">
-        <div class="h-20 flex items-center justify-center lg:justify-start lg:px-6 border-b border-gray-700">
-            <span class="hidden lg:block text-xl font-bold tracking-tight text-brand">Royal POS</span>
-            <span class="lg:hidden text-2xl font-bold text-brand">RP</span>
-        </div>
-        <nav class="flex-1 px-2 lg:px-4 py-6 space-y-2">
-            <a href="pos.html" class="flex items-center justify-center lg:justify-start px-4 py-3 bg-brand text-white rounded-lg shadow-md transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 lg:mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                <span class="hidden lg:block">Terminal</span>
-            </a>
-            <a href="items.html" class="flex items-center justify-center lg:justify-start px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 lg:mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-                <span class="hidden lg:block">Inventory</span>
-            </a>
-            <a href="orders.html" class="flex items-center justify-center lg:justify-start px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 lg:mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                <span class="hidden lg:block">Orders</span>
-            </a>
-        </nav>
-        <div class="p-4 border-t border-gray-700">
-            <a href="../index.html" class="text-sm text-gray-400 hover:text-white flex items-center justify-center lg:justify-start gap-2">
-                <span class="hidden lg:block">&larr; Back to Shop</span>
-            </a>
-        </div>
-    </aside>
-
     <!-- Main Content -->
     <main class="flex-1 flex flex-col h-full overflow-hidden">
         <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm flex-shrink-0">
@@ -117,6 +100,25 @@
                         <span>Delivery (Rs.)</span>
                         <input type="number" id="pos-delivery" value="0" min="0" step="1" class="w-24 text-right border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-brand">
                     </div>
+
+                    <!-- Promo / Voucher Code Row -->
+                    <div class="mb-3 mt-1">
+                        <div id="promo-applied-bar" class="hidden mb-2 flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-1.5">
+                            <span class="text-xs font-bold text-green-700" id="promo-applied-label">🎉 Code applied</span>
+                            <button onclick="clearPromoCode()" class="text-xs text-red-400 hover:text-red-600 font-semibold ml-2">✕ Remove</button>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="pos-promo-input" placeholder="Promo / Voucher Code" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand uppercase" style="font-family:monospace;letter-spacing:1px;" oninput="this.value=this.value.toUpperCase()">
+                            <button id="apply-code-btn" onclick="applyDiscountCode()" class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition">Apply</button>
+                        </div>
+                        <div id="promo-msg" class="text-xs mt-1 font-medium hidden"></div>
+                    </div>
+                    
+                    <!-- Auto Deal Banner (Injected by JS) -->
+                    <div id="auto-deal-bar" class="hidden mb-3 bg-pink-50 border border-pink-200 rounded-lg px-3 py-2 flex items-center justify-between">
+                        <span class="text-xs font-bold text-pink-700" id="auto-deal-label">🎁 Deal Applied</span>
+                    </div>
+
                     <div class="flex justify-between text-2xl font-bold text-gray-900 mb-4 border-t pt-4 border-gray-300">
                         <span>Total</span>
                         <span id="pos-total">Rs. 0.00</span>
@@ -153,6 +155,14 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
                     <input type="text" id="new-cust-address" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone 2 (Optional)</label>
+                    <input type="text" id="new-cust-phone2" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Customer Photo (Optional)</label>
+                    <input type="file" id="new-cust-photo" accept="image/*" class="w-full border border-gray-300 rounded-lg p-1.5 focus:ring-2 focus:ring-brand focus:outline-none text-sm">
                 </div>
                 
                 <div>
@@ -242,23 +252,36 @@
             padding: 12mm 14mm;
             font-family: 'Times New Roman', Times, Georgia, serif;
             font-size: 11pt;
-            color: #1a1a1a;
+            color: #000000;
             background: #ffffff;
             box-sizing: border-box;
         ">
             <!-- ===== HEADER ===== -->
-            <div style="text-align:center; border-bottom: 2.5px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 10px;">
-                <!-- Crown SVG -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32" style="width:52px;height:26px;display:block;margin:0 auto 4px;">
-                    <polygon points="0,32 10,0 22,20 32,2 42,20 54,0 64,32" style="fill:#b8960c;"/>
-                    <circle cx="10" cy="0" r="3" style="fill:#b8960c;"/>
-                    <circle cx="32" cy="2" r="3" style="fill:#b8960c;"/>
-                    <circle cx="54" cy="0" r="3" style="fill:#b8960c;"/>
+            <div style="text-align:center; border-bottom: 2.5px solid #000000; padding-bottom: 12px; margin-bottom: 12px;">
+                <!-- Crown SVG — Bold Black Crown -->
+                <svg id="default-invoice-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60" style="width:80px;height:48px;display:block;margin:0 auto 6px;">
+                    <!-- Base band -->
+                    <rect x="5" y="44" width="90" height="12" rx="3" style="fill:#000;"/>
+                    <!-- Crown body -->
+                    <polygon points="5,44 5,12 28,30 50,4 72,30 95,12 95,44" style="fill:#000;"/>
+                    <!-- Inner highlight cutout -->
+                    <polygon points="12,44 12,20 28,33 50,12 72,33 88,20 88,44" style="fill:#fff;"/>
+                    <!-- Center gem circle -->
+                    <circle cx="50" cy="28" r="7" style="fill:#000;"/>
+                    <!-- Left gem -->
+                    <circle cx="20" cy="34" r="5" style="fill:#000;"/>
+                    <!-- Right gem -->
+                    <circle cx="80" cy="34" r="5" style="fill:#000;"/>
+                    <!-- Top peak dots -->
+                    <circle cx="50" cy="4" r="4" style="fill:#000;"/>
+                    <circle cx="5" cy="12" r="4" style="fill:#000;"/>
+                    <circle cx="95" cy="12" r="4" style="fill:#000;"/>
                 </svg>
+                <img id="custom-invoice-logo" src="" style="max-height: 48px; display: none; margin: 0 auto 6px;">
                 <!-- Brand Name -->
-                <div style="font-family:'Times New Roman',Times,serif; font-size:22pt; font-weight:bold; font-style:italic; letter-spacing:1px; color:#1a1a1a; line-height:1.1;">Royal Pallette</div>
-                <div style="font-family:Tahoma,Arial,sans-serif; font-size:7.5pt; letter-spacing:3px; text-transform:uppercase; color:#555; margin-top:2px;">Premium Beauty &amp; Cosmetics</div>
-                <div style="font-family:Arial,Helvetica,sans-serif; font-size:8.5pt; color:#333; margin-top:6px;">
+                <div style="font-family:'Times New Roman',Times,serif; font-size:22pt; font-weight:bold; font-style:italic; letter-spacing:1px; color:#000000; line-height:1.1;">Royal Pallette</div>
+                <div style="font-family:Tahoma,Arial,sans-serif; font-size:7.5pt; letter-spacing:3px; text-transform:uppercase; color:#000000; margin-top:2px;">Premium Beauty &amp; Cosmetics</div>
+                <div style="font-family:Arial,Helvetica,sans-serif; font-size:8.5pt; color:#000000; margin-top:6px;">
                     <span id="receipt-shop-address">123 Beauty Lane, Colombo</span>
                     &nbsp;&bull;&nbsp;
                     <span id="receipt-shop-phone">Tel: 011-2345678</span>
@@ -268,10 +291,10 @@
             <!-- ===== INVOICE TITLE ===== -->
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
                 <div>
-                    <div style="font-family:'Times New Roman',Times,serif; font-size:15pt; font-weight:bold; letter-spacing:0.5px;">INVOICE</div>
-                    <div style="font-family:Arial,sans-serif; font-size:8pt; color:#555; margin-top:2px;">Point of Sale Receipt</div>
+                    <div style="font-family:'Times New Roman',Times,serif; font-size:15pt; font-weight:bold; letter-spacing:0.5px; color:#000;">INVOICE</div>
+                    <div style="font-family:Arial,sans-serif; font-size:8pt; color:#000000; margin-top:2px;">Point of Sale Receipt</div>
                 </div>
-                <div style="text-align:right; font-family:Arial,sans-serif; font-size:8.5pt; color:#333; line-height:1.8;">
+                <div style="text-align:right; font-family:Arial,sans-serif; font-size:8.5pt; color:#000000; line-height:1.8;">
                     <div><b style="font-family:'Times New Roman',serif;">Invoice No:</b> <span id="receipt-order-no" style="font-weight:bold; color:#000;">#0000</span></div>
                     <div><b style="font-family:'Times New Roman',serif;">Date:</b> <span id="receipt-date"></span></div>
                     <div><b style="font-family:'Times New Roman',serif;">Payment:</b> <span id="receipt-method" style="font-weight:bold;"></span></div>
@@ -279,15 +302,15 @@
             </div>
 
             <!-- ===== BILLED TO ===== -->
-            <div style="background:#f7f7f7; border-left:3px solid #b8960c; padding:7px 10px; margin-bottom:12px; font-family:Arial,sans-serif; font-size:8.5pt;">
-                <div style="font-family:'Times New Roman',serif; font-weight:bold; font-size:9pt; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px;">Billed To</div>
-                <div id="receipt-customer" style="font-weight:600; font-size:10pt; color:#111;"></div>
+            <div style="background:#f0f0f0; border-left:3px solid #000000; padding:7px 10px; margin-bottom:12px; font-family:Arial,sans-serif; font-size:8.5pt;">
+                <div style="font-family:'Times New Roman',serif; font-weight:bold; font-size:9pt; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px; color:#000000;">Billed To</div>
+                <div id="receipt-customer" style="font-weight:600; font-size:10pt; color:#000000;"></div>
             </div>
 
             <!-- ===== ITEMS TABLE ===== -->
             <table style="width:100%; border-collapse:collapse; font-family:Arial,Helvetica,sans-serif; font-size:8.5pt; margin-bottom:10px;">
                 <thead>
-                    <tr style="background:#1a1a1a; color:#fff;">
+                    <tr style="background:#000000; color:#ffffff;">
                         <th style="text-align:left; padding:6px 8px; font-weight:600; letter-spacing:0.3px;">#</th>
                         <th style="text-align:left; padding:6px 8px; font-weight:600;">Item Description</th>
                         <th style="text-align:center; padding:6px 8px; font-weight:600;">Qty</th>
@@ -302,40 +325,48 @@
             <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
                 <table style="font-family:Arial,sans-serif; font-size:8.5pt; border-collapse:collapse; min-width:52%;">
                     <tr>
-                        <td style="padding:3px 8px; color:#555;">Subtotal</td>
-                        <td style="padding:3px 8px; text-align:right; font-weight:600;" id="receipt-subtotal"></td>
+                        <td style="padding:3px 8px; color:#000000;">Subtotal</td>
+                        <td style="padding:3px 8px; text-align:right; font-weight:600; color:#000000;" id="receipt-subtotal"></td>
                     </tr>
                     <tr id="receipt-delivery-row">
-                        <td style="padding:3px 8px; color:#555;">Delivery</td>
-                        <td style="padding:3px 8px; text-align:right; font-weight:600;" id="receipt-delivery"></td>
+                        <td style="padding:3px 8px; color:#000000;">Delivery</td>
+                        <td style="padding:3px 8px; text-align:right; font-weight:600; color:#000000;" id="receipt-delivery"></td>
                     </tr>
                     <tr>
-                        <td style="padding:3px 8px; color:#555;">Discount</td>
-                        <td style="padding:3px 8px; text-align:right; font-weight:600;" id="receipt-discount"></td>
+                        <td style="padding:3px 8px; color:#000000;">Discount</td>
+                        <td style="padding:3px 8px; text-align:right; font-weight:600; color:#000000;" id="receipt-discount"></td>
                     </tr>
-                    <tr style="border-top:2px solid #1a1a1a;">
-                        <td style="padding:6px 8px; font-family:'Times New Roman',serif; font-size:11pt; font-weight:bold;">TOTAL</td>
-                        <td style="padding:6px 8px; text-align:right; font-family:'Times New Roman',serif; font-size:12pt; font-weight:bold; color:#1a1a1a;" id="receipt-total"></td>
+                    <tr id="receipt-promo-row" style="display:none;">
+                        <td style="padding:3px 8px; color:#000000;">Promo (<span id="receipt-promo-code"></span>)</td>
+                        <td style="padding:3px 8px; text-align:right; font-weight:700; color:#000000;" id="receipt-promo-amt"></td>
+                    </tr>
+                    <tr id="receipt-deal-row" style="display:none;">
+                        <td style="padding:3px 8px; color:#000000;" id="receipt-deal-name">Deal</td>
+                        <td style="padding:3px 8px; text-align:right; font-weight:700; color:#000000;" id="receipt-deal-amt"></td>
+                    </tr>
+                    <tr style="border-top:2px solid #000000;">
+                        <td style="padding:6px 8px; font-family:'Times New Roman',serif; font-size:11pt; font-weight:bold; color:#000000;">TOTAL</td>
+                        <td style="padding:6px 8px; text-align:right; font-family:'Times New Roman',serif; font-size:12pt; font-weight:bold; color:#000000;" id="receipt-total"></td>
                     </tr>
                 </table>
             </div>
 
             <!-- ===== PAYMENT DETAILS ===== -->
-            <div style="background:#f7f7f7; border:1px solid #ddd; border-radius:4px; padding:7px 10px; font-family:Arial,sans-serif; font-size:8.5pt; margin-bottom:14px;">
+            <div style="background:#f0f0f0; border:1px solid #000000; border-radius:4px; padding:7px 10px; font-family:Arial,sans-serif; font-size:8.5pt; margin-bottom:14px;">
                 <div style="display:flex; justify-content:space-between;">
-                    <span style="color:#555;">Amount Paid</span>
-                    <span style="font-weight:bold;" id="receipt-paid"></span>
+                    <span style="color:#000000; font-weight:600;">Amount Paid</span>
+                    <span style="font-weight:bold; color:#000000;" id="receipt-paid"></span>
                 </div>
                 <div id="receipt-change-row" style="display:flex; justify-content:space-between; margin-top:3px;">
-                    <span style="color:#555;">Change Returned</span>
-                    <span style="font-weight:bold; color:#166534;" id="receipt-change"></span>
+                    <span style="color:#000000; font-weight:600;">Change Returned</span>
+                    <span style="font-weight:bold; color:#000000;" id="receipt-change"></span>
                 </div>
             </div>
 
             <!-- ===== FOOTER ===== -->
-            <div style="border-top:1px solid #ccc; padding-top:10px; text-align:center;">
-                <div id="receipt-footer-msg" style="font-family:'Times New Roman',Times,serif; font-size:10pt; font-style:italic; color:#444; margin-bottom:4px;">Thank you for shopping with us!</div>
-                <div style="font-family:Arial,sans-serif; font-size:7pt; color:#999; letter-spacing:1px; text-transform:uppercase;">Royal Pallette &mdash; All Rights Reserved</div>
+            <div style="border-top:1.5px solid #000000; padding-top:10px; text-align:center;">
+                <div id="receipt-footer-msg" style="font-family:'Times New Roman',Times,serif; font-size:10pt; font-style:italic; color:#000000; margin-bottom:4px;">Thank you for shopping with us!</div>
+                <div style="font-family:Arial,sans-serif; font-size:7pt; color:#000000; letter-spacing:1px; text-transform:uppercase;">Royal Pallette &mdash; All Rights Reserved</div>
             </div>
         </div>
     </div>
@@ -472,30 +503,46 @@
             const name = document.getElementById('new-cust-name').value.trim();
             const email = document.getElementById('new-cust-email').value.trim();
             const phone = document.getElementById('new-cust-phone').value.trim();
+            const phone2 = document.getElementById('new-cust-phone2').value.trim();
             const address = document.getElementById('new-cust-address').value.trim();
             const country = document.getElementById('new-cust-country').value.trim();
             const province = document.getElementById('new-cust-province').value.trim();
             const district = document.getElementById('new-cust-district').value.trim();
             const town = document.getElementById('new-cust-town').value.trim();
+            const photoFile = document.getElementById('new-cust-photo').files[0];
 
             if (!name) { document.getElementById('new-cust-name').focus(); return alert('Name is required!'); }
 
             const btn = document.getElementById('save-cust-btn');
             btn.disabled = true; btn.textContent = 'Saving...';
+            
             try {
+                // Convert photo to Base64 if exists
+                let photoBase64 = null;
+                if (photoFile) {
+                    photoBase64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = error => reject(error);
+                        reader.readAsDataURL(photoFile);
+                    });
+                }
+
                 const res = await fetch(`${POS_FB_URL}/users.json`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        username: name, email, phone, 
+                        username: name, email, phone, phone2,
                         address, country, province, district, town,
+                        photo: photoBase64,
                         role: 'customer', createdAt: new Date().toISOString() 
                     })
                 });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 
                 // Clear fields
-                ['name','email','phone','address','province','district','town'].forEach(f => document.getElementById('new-cust-'+f).value = '');
+                ['name','email','phone','phone2','address','province','district','town'].forEach(f => document.getElementById('new-cust-'+f).value = '');
+                document.getElementById('new-cust-photo').value = '';
                 document.getElementById('new-cust-district').disabled = true;
                 document.getElementById('new-cust-town').disabled = true;
 

@@ -16,72 +16,11 @@
     <style> body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; } </style>
     <script src="../js/admin_auth.js"></script>
     <script> checkAdminAuth(); </script>
-<script type="module" src="../js/favicon.js"></script>
+    <script type="module" src="../js/favicon.js"></script>
+    <script src="../js/admin_sidebar.js"></script>
 </head>
 <body class="text-gray-800 antialiased flex h-screen overflow-hidden">
     
-    <!-- Sidebar -->
-    <aside class="w-64 bg-dark text-white flex flex-col">
-        <div class="h-20 flex items-center px-6 border-b border-gray-700">
-            <span class="text-2xl font-bold tracking-tight text-brand">Admin Panel</span>
-        </div>
-        <nav class="flex-1 px-4 py-6 space-y-2">
-            <a href="pos.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">POS Terminal</a>
-            <a href="items.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Manage Items</a>
-            <a href="images.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Product Images</a>
-            <a href="orders.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Orders</a>
-            <a href="settings.html" class="flex items-center px-4 py-3 bg-brand text-white rounded-lg shadow-md transition">Site Settings</a>
-        </nav>
-        <div class="p-4 border-t border-gray-800">
-            <button onclick="adminLogout()" class="block w-full text-left py-2 px-4 text-red-400 hover:text-red-300 hover:bg-gray-800 rounded transition">Logout</button>
-        </div>
-        <div class="p-4 border-t border-gray-700">
-            <a href="../index.html" class="text-sm text-gray-400 hover:text-white flex items-center gap-2">
-                &larr; Back to Shop
-            </a>
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden">
-        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm">
-            <h1 class="text-2xl font-semibold text-gray-800">Site Settings</h1>
-        </header>
-
-        <div class="flex-1 overflow-auto p-8">
-            <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-                
-                <h2 class="text-lg font-semibold mb-2">Update Website Logo / Favicon</h2>
-                <p class="text-sm text-gray-500 mb-6">This logo appears in the browser tab next to the page title.</p>
-
-                <form id="favicon-form" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Favicon (PNG/ICO/JPG)</label>
-</head>
-<body class="text-gray-800 antialiased flex h-screen overflow-hidden">
-    
-    <!-- Sidebar -->
-    <aside class="w-64 bg-dark text-white flex flex-col">
-        <div class="h-20 flex items-center px-6 border-b border-gray-700">
-            <span class="text-2xl font-bold tracking-tight text-brand">Admin Panel</span>
-        </div>
-        <nav class="flex-1 px-4 py-6 space-y-2">
-            <a href="pos.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">POS Terminal</a>
-            <a href="items.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Manage Items</a>
-            <a href="images.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Product Images</a>
-            <a href="orders.html" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition">Orders</a>
-            <a href="settings.html" class="flex items-center px-4 py-3 bg-brand text-white rounded-lg shadow-md transition">Site Settings</a>
-        </nav>
-        <div class="p-4 border-t border-gray-800">
-            <button onclick="adminLogout()" class="block w-full text-left py-2 px-4 text-red-400 hover:text-red-300 hover:bg-gray-800 rounded transition">Logout</button>
-        </div>
-        <div class="p-4 border-t border-gray-700">
-            <a href="../index.html" class="text-sm text-gray-400 hover:text-white flex items-center gap-2">
-                &larr; Back to Shop
-            </a>
-        </div>
-    </aside>
-
     <!-- Main Content -->
     <main class="flex-1 flex flex-col h-full overflow-hidden">
         <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm">
@@ -173,6 +112,59 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Edit Customer Modal -->
+            <div id="edit-customer-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+                <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Edit Customer</h3>
+                    <input type="hidden" id="edit-cust-id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                            <input type="text" id="edit-cust-name" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                            <input type="email" id="edit-cust-email" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                            <input type="text" id="edit-cust-phone" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone 2</label>
+                            <input type="text" id="edit-cust-phone2" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                            <input type="text" id="edit-cust-address" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Update Photo (Optional)</label>
+                            <input type="file" id="edit-cust-photo" accept="image/*" class="w-full border border-gray-300 rounded-lg p-1.5 focus:ring-2 focus:ring-brand focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                            <input type="text" id="edit-cust-province" list="edit-province-list" placeholder="Search Province..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" oninput="updateEditDistricts()">
+                            <datalist id="edit-province-list"></datalist>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">District</label>
+                            <input type="text" id="edit-cust-district" list="edit-district-list" placeholder="Search District..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" oninput="updateEditTowns()" disabled>
+                            <datalist id="edit-district-list"></datalist>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Town</label>
+                            <input type="text" id="edit-cust-town" list="edit-town-list" placeholder="Search Town..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-brand focus:outline-none" disabled>
+                            <datalist id="edit-town-list"></datalist>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Cancel</button>
+                        <button type="button" onclick="saveEditCustomer()" id="save-edit-cust-btn" class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition shadow-md">Save Changes</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -247,6 +239,7 @@
                                         ${user.town ? user.town + ', ' : ''}${user.district || '-'}
                                     </td>
                                     <td class="p-2 text-right">
+                                        <button onclick="editCustomer('${id}')" class="text-blue-500 hover:text-blue-700 text-xs px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition mr-2">Edit</button>
                                         <button onclick="deleteCustomer('${id}')" class="text-red-500 hover:text-red-700 text-xs px-2 py-1 rounded bg-red-50 hover:bg-red-100 transition">Delete</button>
                                     </td>
                                 </tr>
@@ -269,6 +262,135 @@
             } catch(e) { alert('Delete failed: ' + e.message); }
         };
 
+        const slGeo = {
+            "Western": { "Colombo": ["Colombo 1-15", "Dehiwala", "Moratuwa", "Kotte", "Maharagama", "Nugegoda", "Homagama", "Avissawella", "Padukka", "Hanwella", "Piliyandala", "Boralesgamuwa", "Kolonnawa"], "Gampaha": ["Gampaha", "Negombo", "Kelaniya", "Peliyagoda", "Wattala", "Kandana", "Ja-Ela", "Seeduwa", "Minuwangoda", "Veyangoda", "Nittambuwa", "Mirigama", "Kirindiwela", "Pugoda", "Kadawatha", "Ragama"], "Kalutara": ["Kalutara", "Panadura", "Horana", "Bandaragama", "Matugama", "Aluthgama", "Beruwala", "Wadduwa", "Agalawatta"] },
+            "Central": { "Kandy": ["Kandy", "Gampola", "Nawalapitiya", "Peradeniya", "Katugastota", "Digana", "Kadugannawa", "Akurana", "Pilimathalawa"], "Matale": ["Matale", "Dambulla", "Galewela", "Ukuwela", "Sigiriya", "Rattota"], "Nuwara Eliya": ["Nuwara Eliya", "Hatton", "Talawakele", "Nanu Oya", "Ginigathena", "Norwood"] },
+            "Southern": { "Galle": ["Galle", "Ambalangoda", "Elpitiya", "Hikkaduwa", "Baddegama", "Karapitiya", "Ahangama", "Bentota"], "Matara": ["Matara", "Weligama", "Dikwella", "Akuressa", "Deniyaya", "Kamburupitiya"], "Hambantota": ["Hambantota", "Tangalle", "Beliatta", "Ambalantota", "Tissamaharama", "Walasmulla"] },
+            "North Western": { "Kurunegala": ["Kurunegala", "Kuliyapitiya", "Pannala", "Narammala", "Giriulla", "Wariyapola", "Polgahawela"], "Puttalam": ["Puttalam", "Chilaw", "Nattandiya", "Wennappuwa", "Marawila", "Dankotuwa", "Kalpitiya"] },
+            "Sabaragamuwa": { "Ratnapura": ["Ratnapura", "Pelmadulla", "Balangoda", "Embilipitiya", "Eheliyagoda", "Kuruwita"], "Kegalle": ["Kegalle", "Mawanella", "Warakapola", "Rambukkana", "Ruwanwella", "Yatiyantota", "Deraniyagala"] },
+            "North Central": { "Anuradhapura": ["Anuradhapura", "Kekirawa", "Thambuththegama", "Eppawala", "Medawachchiya", "Mihintale", "Nochchiyagama"], "Polonnaruwa": ["Polonnaruwa", "Kaduruwela", "Hingurakgoda", "Medirigiriya", "Aralaganwila"] },
+            "Uva": { "Badulla": ["Badulla", "Bandarawela", "Haputale", "Welimada", "Mahiyanganaya", "Passara", "Ella"], "Moneragala": ["Moneragala", "Bibile", "Wellawaya", "Buttala", "Kataragama"] },
+            "Eastern": { "Trincomalee": ["Trincomalee", "Kinniya", "Mutur", "Kantale"], "Batticaloa": ["Batticaloa", "Kattankudy", "Eravur", "Valaichchenai"], "Ampara": ["Ampara", "Kalmunai", "Samanthurai", "Akkaraipattu", "Pottuvil"] },
+            "Northern": { "Jaffna": ["Jaffna", "Chavakachcheri", "Point Pedro", "Valvettithurai", "Nallur"], "Kilinochchi": ["Kilinochchi", "Paranthan", "Pooneryn"], "Mannar": ["Mannar", "Murunkan", "Pesalai"], "Vavuniya": ["Vavuniya", "Cheddikulam"], "Mullaitivu": ["Mullaitivu", "Puthukkudiyiruppu"] }
+        };
+
+        window.updateEditDistricts = function() {
+            const prov = document.getElementById('edit-cust-province').value;
+            const distInput = document.getElementById('edit-cust-district');
+            const distList = document.getElementById('edit-district-list');
+            const townInput = document.getElementById('edit-cust-town');
+            distInput.value = ''; townInput.value = ''; distList.innerHTML = ''; document.getElementById('edit-town-list').innerHTML = '';
+            if (slGeo[prov]) {
+                distInput.disabled = false;
+                Object.keys(slGeo[prov]).forEach(dist => distList.innerHTML += `<option value="${dist}">`);
+            } else { distInput.disabled = true; townInput.disabled = true; }
+        };
+
+        window.updateEditTowns = function() {
+            const prov = document.getElementById('edit-cust-province').value;
+            const dist = document.getElementById('edit-cust-district').value;
+            const townInput = document.getElementById('edit-cust-town');
+            const townList = document.getElementById('edit-town-list');
+            townInput.value = ''; townList.innerHTML = '';
+            if (slGeo[prov] && slGeo[prov][dist]) {
+                townInput.disabled = false;
+                slGeo[prov][dist].forEach(town => townList.innerHTML += `<option value="${town}">`);
+            } else { townInput.disabled = true; }
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('edit-customer-modal').classList.add('hidden');
+            document.getElementById('edit-customer-modal').classList.remove('flex');
+        };
+
+        window.editCustomer = async function(id) {
+            try {
+                const res = await fetch(`${FB_URL}/users/${id}.json`);
+                const user = await res.json();
+                
+                const provList = document.getElementById('edit-province-list');
+                provList.innerHTML = '';
+                Object.keys(slGeo).forEach(prov => provList.innerHTML += `<option value="${prov}">`);
+
+                document.getElementById('edit-cust-id').value = id;
+                document.getElementById('edit-cust-name').value = user.username || '';
+                document.getElementById('edit-cust-email').value = user.email || '';
+                document.getElementById('edit-cust-phone').value = user.phone || '';
+                document.getElementById('edit-cust-phone2').value = user.phone2 || '';
+                document.getElementById('edit-cust-address').value = user.address || '';
+                document.getElementById('edit-cust-province').value = user.province || '';
+                
+                if (user.province && slGeo[user.province]) {
+                    document.getElementById('edit-cust-district').disabled = false;
+                    const distList = document.getElementById('edit-district-list');
+                    distList.innerHTML = '';
+                    Object.keys(slGeo[user.province]).forEach(dist => distList.innerHTML += `<option value="${dist}">`);
+                    document.getElementById('edit-cust-district').value = user.district || '';
+                }
+                
+                if (user.province && user.district && slGeo[user.province][user.district]) {
+                    document.getElementById('edit-cust-town').disabled = false;
+                    const townList = document.getElementById('edit-town-list');
+                    townList.innerHTML = '';
+                    slGeo[user.province][user.district].forEach(town => townList.innerHTML += `<option value="${town}">`);
+                    document.getElementById('edit-cust-town').value = user.town || '';
+                }
+
+                document.getElementById('edit-customer-modal').classList.remove('hidden');
+                document.getElementById('edit-customer-modal').classList.add('flex');
+            } catch (err) { alert('Error loading customer: ' + err.message); }
+        };
+
+        window.saveEditCustomer = async function() {
+            const id = document.getElementById('edit-cust-id').value;
+            const name = document.getElementById('edit-cust-name').value.trim();
+            if (!name) return alert('Name is required!');
+            
+            const btn = document.getElementById('save-edit-cust-btn');
+            btn.disabled = true; btn.textContent = 'Saving...';
+            
+            try {
+                const photoFile = document.getElementById('edit-cust-photo').files[0];
+                let photoBase64 = null;
+                if (photoFile) {
+                    photoBase64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = error => reject(error);
+                        reader.readAsDataURL(photoFile);
+                    });
+                }
+
+                const payload = {
+                    username: name,
+                    email: document.getElementById('edit-cust-email').value.trim(),
+                    phone: document.getElementById('edit-cust-phone').value.trim(),
+                    phone2: document.getElementById('edit-cust-phone2').value.trim(),
+                    address: document.getElementById('edit-cust-address').value.trim(),
+                    province: document.getElementById('edit-cust-province').value.trim(),
+                    district: document.getElementById('edit-cust-district').value.trim(),
+                    town: document.getElementById('edit-cust-town').value.trim()
+                };
+                
+                if (photoBase64) payload.photo = photoBase64;
+
+                const res = await fetch(`${FB_URL}/users/${id}.json`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                
+                closeEditModal();
+                loadCustMan();
+            } catch (err) {
+                alert('Error updating: ' + err.message);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Save Changes';
+            }
+        };
+
         // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
             // Mock event for initial load
@@ -277,7 +399,7 @@
             loadCustMan();
         });
     </script>
-
+    <script type="module">
         import { storage, db } from '../js/firebase-config.js';
         import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
         import { ref as dbRef, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";

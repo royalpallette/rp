@@ -22,6 +22,15 @@
             <a href="../index.html" class="text-2xl font-bold text-brand-dark">Royal Pallette</a>
             <button id="logout-btn" class="text-sm text-gray-500 hover:text-brand transition">Logout</button>
         </div>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Simple Nav -->
+    <nav class="bg-white border-b border-gray-200">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="../index.html" class="text-2xl font-bold text-brand-dark">Royal Pallette</a>
+            <button id="logout-btn" class="text-sm text-gray-500 hover:text-brand transition">Logout</button>
+        </div>
     </nav>
 
     <main class="flex-1 max-w-2xl w-full mx-auto p-6 mt-10">
@@ -29,6 +38,18 @@
             <h1 class="text-2xl font-bold text-gray-900 mb-6">Edit Profile</h1>
             
             <form id="profile-form" class="space-y-6">
+                <!-- Profile Picture -->
+                <div class="flex flex-col items-center mb-6">
+                    <div class="w-24 h-24 rounded-full bg-gray-200 overflow-hidden mb-3 border-2 border-brand relative group">
+                        <img id="prof-img-preview" src="" class="w-full h-full object-cover hidden">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:bg-opacity-30 group-hover:text-white transition cursor-pointer" onclick="document.getElementById('prof-photo').click()">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        </div>
+                    </div>
+                    <input type="file" id="prof-photo" accept="image/*" class="hidden">
+                    <span class="text-xs text-gray-500">Click to change picture</span>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Username</label>
                     <input type="text" id="prof-username" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand focus:border-brand">
@@ -40,6 +61,11 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Phone Number</label>
                     <input type="tel" id="prof-phone" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand focus:border-brand">
+                </div>
+                <div class="border-t border-gray-100 pt-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Security</h3>
+                    <label class="block text-sm font-medium text-gray-700">New Password (leave blank to keep current)</label>
+                    <input type="password" id="prof-password" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand focus:border-brand" placeholder="••••••••">
                 </div>
                 
                 <div id="status-msg" class="text-sm hidden"></div>
@@ -55,7 +81,7 @@
 
     <script type="module">
         import { auth, db } from '../js/firebase-config.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const form = document.getElementById('profile-form');
@@ -73,6 +99,10 @@
                         const data = snapshot.val();
                         document.getElementById('prof-username').value = data.username || '';
                         document.getElementById('prof-phone').value = data.phone || '';
+                        if (data.photo) {
+                            photoPreview.src = data.photo;
+                            photoPreview.classList.remove('hidden');
+                        }
                     }
                 } catch (e) {
                     console.error("Error fetching profile", e);
@@ -90,10 +120,21 @@
             statusMsg.classList.add('hidden');
 
             try {
-                await update(ref(db, "users/" + currentUserUid), {
+                let currentAuthUser = auth.currentUser;
+                const newPass = document.getElementById('prof-password').value;
+                if (newPass && currentAuthUser) {
+                    await updatePassword(currentAuthUser, newPass);
+                }
+
+                const updates = {
                     username: document.getElementById('prof-username').value,
                     phone: document.getElementById('prof-phone').value
-                });
+                };
+                if (newPhotoBase64) {
+                    updates.photo = newPhotoBase64;
+                }
+
+                await update(ref(db, "users/" + currentUserUid), updates);
                 statusMsg.textContent = "Profile updated successfully!";
                 statusMsg.className = "text-sm text-green-600 block mt-2";
             } catch (error) {
@@ -110,6 +151,24 @@
             signOut(auth).then(() => {
                 window.location.href = '../index.html';
             });
+        });
+
+        // Photo Upload Logic
+        const photoInput = document.getElementById('prof-photo');
+        const photoPreview = document.getElementById('prof-img-preview');
+        let newPhotoBase64 = null;
+
+        photoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    newPhotoBase64 = reader.result;
+                    photoPreview.src = newPhotoBase64;
+                    photoPreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
         });
     </script>
 </body>

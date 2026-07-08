@@ -28,12 +28,10 @@ const addLogoBtn = document.getElementById('add-logo-btn');
 const cropBtn = document.getElementById('crop-btn');
 const resetCanvasBtn = document.getElementById('reset-canvas-btn');
 const textToolOptions = document.getElementById('text-tool-options');
-const applyTextBtn = document.getElementById('apply-text-btn');
 const cancelTextBtn = document.getElementById('cancel-text-btn');
 
 // Cropping Elements
-const cropOverlay = document.getElementById('crop-overlay');
-const cropBox = document.getElementById('crop-box');
+const cropActions = document.getElementById('crop-actions');
 const applyCropBtn = document.getElementById('apply-crop-btn');
 const cancelCropBtn = document.getElementById('cancel-crop-btn');
 
@@ -41,8 +39,8 @@ const cancelCropBtn = document.getElementById('cancel-crop-btn');
 let originalImage = null; // HTMLImageElement
 let currentImage = null; // HTMLImageElement (modified)
 let stream = null;
-let isCropping = false;
-let startX, startY, endX, endY;
+let cropper = null;
+let isTextMode = false;
 
 // Setup Drag & Drop
 dropZone.addEventListener('click', () => fileInput.click());
@@ -174,32 +172,46 @@ captureBtn.addEventListener('click', () => {
 
 // Add Text Tool
 addTextBtn.addEventListener('click', () => {
+    if (!currentImage) return alert('Load an image first!');
+    if (cropper) return alert('Please finish cropping first!');
+    
+    isTextMode = true;
     textToolOptions.classList.remove('hidden');
-});
-cancelTextBtn.addEventListener('click', () => {
-    textToolOptions.classList.add('hidden');
+    canvas.style.cursor = 'crosshair';
 });
 
-applyTextBtn.addEventListener('click', () => {
-    if (!currentImage) return alert('Load an image first!');
+cancelTextBtn.addEventListener('click', () => {
+    isTextMode = false;
+    textToolOptions.classList.add('hidden');
+    canvas.style.cursor = 'default';
+});
+
+// Canvas click to place text
+canvas.addEventListener('click', (e) => {
+    if (!isTextMode || !currentImage || cropper) return;
+    
     const text = document.getElementById('overlay-text').value.trim();
     if (!text) return;
     const color = document.getElementById('overlay-color').value;
     const size = document.getElementById('overlay-size').value;
 
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
     ctx.font = `bold ${size} Inter, sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = "center";
-    ctx.textBaseline = "bottom";
+    ctx.textBaseline = "middle";
     
     // Add some shadow for visibility
     ctx.shadowColor="black";
     ctx.shadowBlur=7;
     ctx.lineWidth = 5;
     
-    const x = canvas.width / 2;
-    const y = canvas.height - 20;
-
     // Draw text outline then fill
     ctx.strokeStyle = "rgba(0,0,0,0.5)";
     ctx.strokeText(text, x, y);
@@ -207,8 +219,6 @@ applyTextBtn.addEventListener('click', () => {
 
     // Save state
     saveCurrentCanvasState();
-    textToolOptions.classList.add('hidden');
-    document.getElementById('overlay-text').value = '';
 });
 
 // Add Logo Tool
@@ -242,86 +252,117 @@ function saveCurrentCanvasState() {
     img.src = dataUrl;
 }
 
-// Crop Tool - Basic implementation
+// Crop Tool - Cropper.js implementation
 cropBtn.addEventListener('click', () => {
     if (!currentImage) return alert('Load an image first!');
-    isCropping = true;
-    cropOverlay.classList.remove('hidden');
-    cropOverlay.classList.add('flex');
+    if (cropper) return; // Already cropping
+
+    cropActions.classList.remove('hidden');
+    cropActions.classList.add('flex');
     
-    // Reset crop box
-    cropBox.style.left = '10%';
-    cropBox.style.top = '10%';
-    cropBox.style.width = '80%';
-    cropBox.style.height = '80%';
+    cropper = new Cropper(canvas, {
+        viewMode: 1,
+        dragMode: 'crop',
+        autoCropArea: 0.8,
+        restore: false,
+        guides: true,
+        center: true,
+        highlight: false,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false,
+    });
 });
 
 cancelCropBtn.addEventListener('click', () => {
-    isCropping = false;
-    cropOverlay.classList.add('hidden');
-    cropOverlay.classList.remove('flex');
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    cropActions.classList.add('hidden');
+    cropActions.classList.remove('flex');
 });
 
 applyCropBtn.addEventListener('click', () => {
-    if (!isCropping) return;
+    if (!cropper) return;
     
-    // Calculate actual canvas coordinates from css coordinates
-    const rect = canvas.getBoundingClientRect();
-    const boxRect = cropBox.getBoundingClientRect();
-    
-    // Scale factor
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    
-    const cropX = (boxRect.left - rect.left) * scaleX;
-    const cropY = (boxRect.top - rect.top) * scaleY;
-    const cropW = boxRect.width * scaleX;
-    const cropH = boxRect.height * scaleY;
-
-    // Create temp canvas to extract cropped area
-    const tCanvas = document.createElement('canvas');
-    tCanvas.width = cropW;
-    tCanvas.height = cropH;
-    const tCtx = tCanvas.getContext('2d');
-    
-    tCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-    
-    loadToCanvas(tCanvas.toDataURL('image/png'));
-    
-    isCropping = false;
-    cropOverlay.classList.add('hidden');
-    cropOverlay.classList.remove('flex');
+    const croppedCanvas = cropper.getCroppedCanvas();
+    if (croppedCanvas) {
+        const dataUrl = croppedCanvas.toDataURL('image/png');
+        cropper.destroy();
+        cropper = null;
+        
+        cropActions.classList.add('hidden');
+        cropActions.classList.remove('flex');
+        
+        loadToCanvas(dataUrl);
+    }
 });
 
-// Draggable Crop Box logic
-let isDraggingBox = false;
-let dragStartX, dragStartY;
-let boxStartLeft, boxStartTop;
+// ===== STAMP PRODUCT CODE ON CANVAS =====
+function stampProductCode(code) {
+    if (!code) return;
 
-cropBox.addEventListener('mousedown', (e) => {
-    if (e.target.classList.contains('handle')) return; // Ignore handles
-    isDraggingBox = true;
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    boxStartLeft = parseFloat(cropBox.style.left) || 0;
-    boxStartTop = parseFloat(cropBox.style.top) || 0;
-});
+    const padding = 10;
+    const labelText = `#${code}`;
 
-document.addEventListener('mousemove', (e) => {
-    if (!isDraggingBox) return;
-    const containerRect = canvasContainer.getBoundingClientRect();
-    
-    // Calculate percentage change
-    const dx = ((e.clientX - dragStartX) / containerRect.width) * 100;
-    const dy = ((e.clientY - dragStartY) / containerRect.height) * 100;
-    
-    cropBox.style.left = `${Math.min(Math.max(0, boxStartLeft + dx), 100 - parseFloat(cropBox.style.width))}%`;
-    cropBox.style.top = `${Math.min(Math.max(0, boxStartTop + dy), 100 - parseFloat(cropBox.style.height))}%`;
-});
+    // Determine font size relative to canvas
+    const fontSize = Math.max(20, Math.min(48, canvas.width * 0.045));
+    ctx.font = `bold ${fontSize}px 'Inter', Arial, sans-serif`;
 
-document.addEventListener('mouseup', () => {
-    isDraggingBox = false;
-});
+    const textWidth = ctx.measureText(labelText).width;
+    const boxW = textWidth + padding * 2.5;
+    const boxH = fontSize + padding * 1.5;
+    const boxX = padding;
+    const boxY = canvas.height - boxH - padding;
+
+    // Background pill
+    ctx.save();
+    ctx.globalAlpha = 0.82;
+    ctx.fillStyle = '#1a1a1a';
+    const r = boxH / 2;
+    ctx.beginPath();
+    ctx.moveTo(boxX + r, boxY);
+    ctx.lineTo(boxX + boxW - r, boxY);
+    ctx.quadraticCurveTo(boxX + boxW, boxY, boxX + boxW, boxY + r);
+    ctx.lineTo(boxX + boxW, boxY + boxH - r);
+    ctx.quadraticCurveTo(boxX + boxW, boxY + boxH, boxX + boxW - r, boxY + boxH);
+    ctx.lineTo(boxX + r, boxY + boxH);
+    ctx.quadraticCurveTo(boxX, boxY + boxH, boxX, boxY + boxH - r);
+    ctx.lineTo(boxX, boxY + r);
+    ctx.quadraticCurveTo(boxX, boxY, boxX + r, boxY);
+    ctx.closePath();
+    ctx.fill();
+
+    // Left accent strip
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#fb7185';
+    ctx.beginPath();
+    ctx.moveTo(boxX + r, boxY);
+    ctx.lineTo(boxX + r + fontSize * 0.8, boxY);
+    ctx.lineTo(boxX + r + fontSize * 0.8, boxY + boxH);
+    ctx.lineTo(boxX + r, boxY + boxH);
+    ctx.quadraticCurveTo(boxX, boxY + boxH, boxX, boxY + boxH - r);
+    ctx.lineTo(boxX, boxY + r);
+    ctx.quadraticCurveTo(boxX, boxY, boxX + r, boxY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Text
+    ctx.save();
+    ctx.font = `bold ${fontSize}px 'Inter', Arial, sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(labelText, boxX + padding * 1.2 + fontSize * 0.8 + 2, boxY + boxH / 2);
+    ctx.restore();
+
+    // Save stamped state as current image
+    saveCurrentCanvasState();
+}
 
 // Save logic
 saveImageBtn.addEventListener('click', async () => {
@@ -338,11 +379,17 @@ saveImageBtn.addEventListener('click', async () => {
     }
 
     saveImageBtn.disabled = true;
-    saveImageBtn.innerHTML = 'Processing...';
+    saveImageBtn.innerHTML = '⏳ Processing...';
 
     try {
+        // Stamp the product code onto the image before saving
+        stampProductCode(code);
+
+        // Small delay to let canvas state update
+        await new Promise(r => setTimeout(r, 80));
+
         // Compress the final canvas image
-        const finalBase64 = canvas.toDataURL('image/jpeg', 0.85);
+        const finalBase64 = canvas.toDataURL('image/jpeg', 0.88);
 
         // Save to Firebase
         await set(ref(db, `product_images/${code}`), {
@@ -387,16 +434,25 @@ function renderGallery(data) {
     
     Object.entries(data).reverse().forEach(([code, item]) => {
         const div = document.createElement('div');
-        div.className = 'bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition group relative';
+        div.className = 'bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition group relative';
         div.innerHTML = `
-            <div class="h-24 bg-gray-100 flex items-center justify-center overflow-hidden">
+            <div class="relative h-28 bg-gray-100 flex items-center justify-center overflow-hidden">
                 <img src="${item.imageBase64}" class="w-full h-full object-cover">
+                <!-- Product Code Badge overlay on image -->
+                <div class="absolute bottom-0 left-0 right-0 flex items-center gap-1.5 px-2 py-1.5"
+                     style="background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);">
+                    <span style="background:#fb7185; color:#fff; font-size:9px; font-weight:800;
+                                 padding:2px 6px; border-radius:4px; letter-spacing:0.5px; text-transform:uppercase;"
+                          >#${code}</span>
+                </div>
             </div>
             <div class="p-2">
-                <p class="text-xs font-bold text-gray-800">Code: ${code}</p>
+                <div class="flex items-center gap-1 mb-0.5">
+                    <span class="text-xs font-extrabold text-gray-800">${code}</span>
+                </div>
                 <p class="text-[10px] text-gray-500 truncate">${item.description || 'No description'}</p>
             </div>
-            <button class="delete-btn absolute top-1 right-1 bg-white text-red-500 rounded-full w-6 h-6 flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition hover:bg-red-50">
+            <button class="delete-btn absolute top-1 right-1 bg-white text-red-500 rounded-full w-6 h-6 flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition hover:bg-red-50 z-10">
                 &times;
             </button>
         `;
